@@ -13,6 +13,7 @@
 #import "BoardsControllerPhone.h"
 #import "BoardsControllerPad.h"
 #import "FRETypeConversion.h"
+#import "LeaderboardWithNames.h"
 
 #define DEFINE_ANE_FUNCTION(fn) FREObject (fn)(FREContext context, void* functionData, uint32_t argc, FREObject argv[])
 
@@ -56,46 +57,51 @@ id getReturnObject( NSString* key )
     return object;
 }
 
-FREResult FRENewObjectFromGKScore( GKScore* score, FREObject* asScore )
+FREResult FRENewObjectFromGKPlayer( GKPlayer* player, FREObject* asPlayer )
 {
     FREResult result;
-    FREObject category;
-    FREObject value;
-    FREObject formattedValue;
-    FREObject date;
-    FREObject playerId;
-    FREObject rank;
+    
+    result = FRENewObject( ASPlayer, 0, NULL, asPlayer, NULL);
+    if( result != FRE_OK ) return result;
+    
+    result = FRESetObjectPropertyString( *asPlayer, "id", player.playerID );
+    if( result != FRE_OK ) return result;
+    
+    result = FRESetObjectPropertyString( *asPlayer, "alias", player.alias );
+    if( result != FRE_OK ) return result;
+    
+    result = FRESetObjectPropertyBool( *asPlayer, "isFriend", player.isFriend );
+    if( result != FRE_OK ) return result;
+    
+    return FRE_OK;
+}
+
+FREResult FRENewObjectFromGKScore( GKScore* score, GKPlayer* player, FREObject* asScore )
+{
+    FREResult result;
+    FREObject asPlayer;
+    
     result = FRENewObject( ASScore, 0, NULL, asScore, NULL);
     if( result != FRE_OK ) return result;
     
-    result = FRENewObjectFromUTF8( score.category.length, (uint8_t*) score.category.UTF8String, &category );
-    if( result != FRE_OK ) return result;
-    result = FRESetObjectProperty( *asScore, "category", category, NULL );
+    result = FRESetObjectPropertyString( *asScore, "category", score.category );
     if( result != FRE_OK ) return result;
     
-    result = FRENewObjectFromInt32( score.value, &value );
-    if( result != FRE_OK ) return result;
-    result = FRESetObjectProperty( *asScore, "value", value, NULL );
+    result = FRESetObjectPropertyInt( *asScore, "value", score.value );
     if( result != FRE_OK ) return result;
     
-    result = FRENewObjectFromUTF8( score.formattedValue.length, (uint8_t*) score.formattedValue.UTF8String, &formattedValue );
-    if( result != FRE_OK ) return result;
-    result = FRESetObjectProperty( *asScore, "formattedValue", formattedValue, NULL );
+    result = FRESetObjectPropertyString( *asScore, "formattedValue", score.formattedValue );
     if( result != FRE_OK ) return result;
     
-    result = FRENewObjectFromDate( score.date, &date );
-    if( result != FRE_OK ) return result;
-    result = FRESetObjectProperty( *asScore, "date", date, NULL );
+    result = FRESetObjectPropertyDate( *asScore, "date", score.date );
     if( result != FRE_OK ) return result;
     
-    result = FRENewObjectFromUTF8( score.playerID.length, (uint8_t*) score.playerID.UTF8String, &playerId );
+    result = FRENewObjectFromGKPlayer( player, &asPlayer );
     if( result != FRE_OK ) return result;
-    result = FRESetObjectProperty( *asScore, "playerId", playerId, NULL );
+    result = FRESetObjectProperty( *asScore, "player", asPlayer, NULL );
     if( result != FRE_OK ) return result;
     
-    result = FRENewObjectFromInt32( score.rank, &rank );
-    if( result != FRE_OK ) return result;
-    result = FRESetObjectProperty( *asScore, "rank", rank, NULL );
+    result = FRESetObjectPropertyInt( *asScore, "rank", score.rank );
     if( result != FRE_OK ) return result;
     
     return FRE_OK;
@@ -158,16 +164,12 @@ DEFINE_ANE_FUNCTION( getLocalPlayer )
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if ( localPlayer && localPlayer.isAuthenticated )
     {
-        FREObject result;
-        FREObject playerId;
-        FREObject alias;
-        if ( FRENewObject( ASLocalPlayer, 0, NULL, &result, NULL ) == FRE_OK
-            && FRENewObjectFromUTF8( localPlayer.playerID.length, (uint8_t*) localPlayer.playerID.UTF8String, &playerId ) == FRE_OK
-            && FRESetObjectProperty( result, "id", playerId, NULL ) == FRE_OK
-            && FRENewObjectFromUTF8( localPlayer.alias.length, (uint8_t*) localPlayer.alias.UTF8String, &alias ) == FRE_OK
-            && FRESetObjectProperty( result, "alias", alias, NULL ) == FRE_OK )
+        FREObject asPlayer;
+        if ( FRENewObject( ASLocalPlayer, 0, NULL, &asPlayer, NULL ) == FRE_OK
+            && FRESetObjectPropertyString( asPlayer, "id", localPlayer.playerID ) == FRE_OK
+            && FRESetObjectPropertyString( asPlayer, "alias", localPlayer.alias ) == FRE_OK )
         {
-            return result;
+            return asPlayer;
         }
     }
     else
@@ -179,13 +181,10 @@ DEFINE_ANE_FUNCTION( getLocalPlayer )
 
 DEFINE_ANE_FUNCTION( reportScore )
 {
-    uint32_t length = 0;
-    const uint8_t* categoryValue = NULL;
+    NSString* category;
+    if( FREGetObjectAsString( argv[0], &category ) != FRE_OK ) return NULL;
+    
     int32_t scoreValue = 0;
-    
-    if( FREGetObjectAsUTF8( argv[0], &length, &categoryValue ) != FRE_OK ) return NULL;
-    NSString* category = [NSString stringWithUTF8String: (char*) categoryValue];
-    
     if( FREGetObjectAsInt32( argv[1], &scoreValue ) != FRE_OK ) return NULL;
     
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
@@ -223,10 +222,8 @@ DEFINE_ANE_FUNCTION( showStandardLeaderboard )
 
 DEFINE_ANE_FUNCTION( showStandardLeaderboardWithCategory )
 {
-    uint32_t length = 0;
-    const uint8_t* categoryValue = NULL;
-    if( FREGetObjectAsUTF8( argv[0], &length, &categoryValue ) != FRE_OK ) return NULL;
-    NSString* category = [NSString stringWithUTF8String: (char*) categoryValue];
+    NSString* category;
+    if( FREGetObjectAsString( argv[0], &category ) != FRE_OK ) return NULL;
     
     createBoardsController( context );
     [boardsController displayLeaderboardWithCategory:category];
@@ -245,11 +242,9 @@ DEFINE_ANE_FUNCTION( showStandardLeaderboardWithTimescope )
 
 DEFINE_ANE_FUNCTION( showStandardLeaderboardWithCategoryAndTimescope )
 {
+    NSString* category;
+    if( FREGetObjectAsString( argv[0], &category ) != FRE_OK ) return NULL;
     int timeScope;
-    uint32_t length = 0;
-    const uint8_t* categoryValue = NULL;
-    if( FREGetObjectAsUTF8( argv[0], &length, &categoryValue ) != FRE_OK ) return NULL;
-    NSString* category = [NSString stringWithUTF8String: (char*) categoryValue];
     if( FREGetObjectAsInt32( argv[1], &timeScope ) != FRE_OK ) return NULL;
     
     createBoardsController( context );
@@ -257,16 +252,81 @@ DEFINE_ANE_FUNCTION( showStandardLeaderboardWithCategoryAndTimescope )
     return NULL;
 }
 
+DEFINE_ANE_FUNCTION( getLeaderboard )
+{
+    GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
+    if( !localPlayer.isAuthenticated )
+    {
+        DISPATCH_STATUS_EVENT( context, "", notAuthenticated );
+        return NULL;
+    }
+    
+    GKLeaderboard* leaderboard = [[GKLeaderboard alloc] init];
+    
+    NSString* propertyString;
+    if( FREGetObjectAsString( argv[0], &propertyString ) != FRE_OK ) return NULL;
+    leaderboard.category = propertyString;
+    
+    int propertyInt;
+    if( FREGetObjectAsInt32( argv[1], &propertyInt ) != FRE_OK ) return NULL;
+    leaderboard.playerScope = propertyInt;
+    
+    if( FREGetObjectAsInt32( argv[2], &propertyInt ) != FRE_OK ) return NULL;
+    leaderboard.timeScope = propertyInt;
+    
+    int propertyInt2;
+    if( FREGetObjectAsInt32( argv[3], &propertyInt ) != FRE_OK ) return NULL;
+    if( FREGetObjectAsInt32( argv[4], &propertyInt2 ) != FRE_OK ) return NULL;
+    leaderboard.range = NSMakeRange( propertyInt, propertyInt2 );
+    
+    [leaderboard loadScoresWithCompletionHandler:^( NSArray* scores, NSError* error )
+    {
+        if( error == nil && scores != nil )
+        {
+            LeaderboardWithNames* leaderboardWithNames = [[LeaderboardWithNames alloc] initWithLeaderboard:leaderboard];
+            NSMutableArray* playerIds = [[[NSMutableArray alloc] initWithCapacity:scores.count] autorelease];
+            int i = 0;
+            for ( GKScore* score in scores )
+            {
+                [playerIds insertObject:score.playerID atIndex:i];
+                ++i;
+            }
+            [GKPlayer loadPlayersForIdentifiers:playerIds withCompletionHandler:^(NSArray *playerDetails, NSError *error)
+            {
+                if ( error == nil && playerDetails != nil )
+                {
+                    NSMutableDictionary* names = [[[NSMutableDictionary alloc] init] autorelease];
+                    for( GKPlayer* player in playerDetails )
+                    {
+                        [names setValue:player forKey:player.playerID];
+                    }
+                    leaderboardWithNames.names = names;
+                    NSString* code = storeReturnObject( leaderboardWithNames );
+                    DISPATCH_STATUS_EVENT( context, code.UTF8String, loadLeaderboardComplete );
+                }
+                else
+                {
+                    [leaderboardWithNames release];
+                    DISPATCH_STATUS_EVENT( context, "", loadLeaderboardFailed );
+                }
+            }];
+        }
+        else
+        {
+            [leaderboard release];
+            DISPATCH_STATUS_EVENT( context, "", loadLeaderboardFailed );
+        }
+    }];
+    return NULL;
+}
+
 DEFINE_ANE_FUNCTION( reportAchievement )
 {
-    uint32_t length = 0;
-    const uint8_t* identifierValue = NULL;
-    double achievementValue = 0;
+    NSString* identifier;
+    if( FREGetObjectAsString( argv[0], &identifier ) != FRE_OK ) return NULL;
     
-    if( FREGetObjectAsUTF8( argv[0], &length, &identifierValue ) != FRE_OK ) return NULL;
-    NSString* identifier = [NSString stringWithUTF8String: (char*) identifierValue];
-    
-    if( FREGetObjectAsDouble( argv[1], &achievementValue ) != FRE_OK ) return NULL;
+    double value = 0;
+    if( FREGetObjectAsDouble( argv[1], &value ) != FRE_OK ) return NULL;
     
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
@@ -278,7 +338,7 @@ DEFINE_ANE_FUNCTION( reportAchievement )
     GKAchievement* achievement = [[[GKAchievement alloc] initWithIdentifier:identifier] autorelease];
     if( achievement )
     {
-        achievement.percentComplete = achievementValue * 100;
+        achievement.percentComplete = value * 100;
         [achievement reportAchievementWithCompletionHandler:^(NSError* error)
          {
              if( error == nil )
@@ -356,10 +416,9 @@ DEFINE_ANE_FUNCTION( getLocalPlayerScore )
     
     GKLeaderboard* leaderboard = [[GKLeaderboard alloc] init];
 
-    uint32_t length = 0;
-    const uint8_t* categoryString = NULL;
-    if( FREGetObjectAsUTF8( argv[0], &length, &categoryString ) != FRE_OK ) return NULL;
-    leaderboard.category = [NSString stringWithUTF8String: (char*) categoryString];
+    NSString* propertyString;
+    if( FREGetObjectAsString( argv[0], &propertyString ) != FRE_OK ) return NULL;
+    leaderboard.category = propertyString;
 
     int propertyInt;
     if( FREGetObjectAsInt32( argv[1], &propertyInt ) != FRE_OK ) return NULL;
@@ -388,10 +447,16 @@ DEFINE_ANE_FUNCTION( getLocalPlayerScore )
 
 DEFINE_ANE_FUNCTION( getStoredLocalPlayerScore )
 {
-    uint32_t length = 0;
-    const uint8_t* keyValue = NULL;
-    if( FREGetObjectAsUTF8( argv[0], &length, &keyValue ) != FRE_OK ) return NULL;
-    NSString* key = [NSString stringWithUTF8String: (char*) keyValue];
+    GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
+    if( !localPlayer.isAuthenticated )
+    {
+        DISPATCH_STATUS_EVENT( context, "", notAuthenticated );
+        return NULL;
+    }
+
+    NSString* key;
+    if( FREGetObjectAsString( argv[0], &key ) != FRE_OK ) return NULL;
+
     GKLeaderboard* leaderboard = getReturnObject( key );
     
     if( leaderboard == nil )
@@ -399,26 +464,16 @@ DEFINE_ANE_FUNCTION( getStoredLocalPlayerScore )
         return NULL;
     }
     FREObject asLeaderboard;
-    FREObject asTimeScope;
-    FREObject asPlayerScope;
-    FREObject asCategory;
-    FREObject asTitle;
     FREObject asScore;
-    FREObject asRangeMax;
     
     if ( FRENewObject( ASLeaderboard, 0, NULL, &asLeaderboard, NULL) == FRE_OK
-        && FRENewObjectFromInt32( leaderboard.timeScope, &asTimeScope ) == FRE_OK
-        && FRESetObjectProperty( asLeaderboard, "timeScope", asTimeScope, NULL ) == FRE_OK
-        && FRENewObjectFromInt32( leaderboard.playerScope, &asPlayerScope ) == FRE_OK
-        && FRESetObjectProperty( asLeaderboard, "playerScope", asPlayerScope, NULL ) == FRE_OK
-        && FRENewObjectFromUTF8( leaderboard.category.length, (uint8_t*) leaderboard.category.UTF8String, &asCategory ) == FRE_OK
-        && FRESetObjectProperty( asLeaderboard, "category", asCategory, NULL ) == FRE_OK
-        && FRENewObjectFromUTF8( leaderboard.title.length, (uint8_t*) leaderboard.title.UTF8String, &asTitle ) == FRE_OK
-        && FRESetObjectProperty( asLeaderboard, "title", asTitle, NULL ) == FRE_OK
-        && FRENewObjectFromInt32( leaderboard.maxRange, &asRangeMax ) == FRE_OK
-        && FRESetObjectProperty( asLeaderboard, "rangeMax", asRangeMax, NULL ) == FRE_OK )
+        && FRESetObjectPropertyInt( asLeaderboard, "timeScope", leaderboard.timeScope ) == FRE_OK
+        && FRESetObjectPropertyInt( asLeaderboard, "playerScope", leaderboard.playerScope ) == FRE_OK
+        && FRESetObjectPropertyString( asLeaderboard, "category", leaderboard.category ) == FRE_OK
+        && FRESetObjectPropertyString( asLeaderboard, "title", leaderboard.title ) == FRE_OK
+        && FRESetObjectPropertyInt( asLeaderboard, "rangeMax", leaderboard.maxRange ) == FRE_OK )
     {
-        if( leaderboard.localPlayerScore && FRENewObjectFromGKScore( leaderboard.localPlayerScore, &asScore ) == FRE_OK )
+        if( leaderboard.localPlayerScore && FRENewObjectFromGKScore( leaderboard.localPlayerScore, localPlayer, &asScore ) == FRE_OK )
         {
             FRESetObjectProperty( asLeaderboard, "localPlayerScore", asScore, NULL );
         }
@@ -429,18 +484,84 @@ DEFINE_ANE_FUNCTION( getStoredLocalPlayerScore )
     return NULL;
 }
 
+DEFINE_ANE_FUNCTION( getStoredLeaderboard )
+{
+    GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
+    if( !localPlayer.isAuthenticated )
+    {
+        DISPATCH_STATUS_EVENT( context, "", notAuthenticated );
+        return NULL;
+    }
+
+    NSString* key;
+    if( FREGetObjectAsString( argv[0], &key ) != FRE_OK ) return NULL;
+
+    LeaderboardWithNames* leaderboardWithNames = getReturnObject( key );
+    GKLeaderboard* leaderboard = leaderboardWithNames.leaderboard;
+    NSLog( @"read leaderboard %d", leaderboard.retainCount );
+    NSDictionary* names = leaderboardWithNames.names;
+    NSLog( @"read names %d", names.retainCount );
+    
+    if( leaderboard == nil || names == nil )
+    {
+        return NULL;
+    }
+    FREObject asLeaderboard;
+    FREObject asLocalScore;
+    
+    if ( FRENewObject( ASLeaderboard, 0, NULL, &asLeaderboard, NULL) == FRE_OK
+        && FRESetObjectPropertyInt( asLeaderboard, "timeScope", leaderboard.timeScope ) == FRE_OK
+        && FRESetObjectPropertyInt( asLeaderboard, "playerScope", leaderboard.playerScope ) == FRE_OK
+        && FRESetObjectPropertyString( asLeaderboard, "category", leaderboard.category ) == FRE_OK
+        && FRESetObjectPropertyString( asLeaderboard, "title", leaderboard.title ) == FRE_OK
+        && FRESetObjectPropertyInt( asLeaderboard, "rangeMax", leaderboard.maxRange ) == FRE_OK
+        && FRESetObjectPropertyInt( asLeaderboard, "rangeStart", leaderboard.range.location ) == FRE_OK
+        && FRESetObjectPropertyInt( asLeaderboard, "rangeLength", leaderboard.range.length ) == FRE_OK
+        )
+    {
+        if( leaderboard.localPlayerScore && FRENewObjectFromGKScore( leaderboard.localPlayerScore, localPlayer, &asLocalScore ) == FRE_OK )
+        {
+            FRESetObjectProperty( asLeaderboard, "localPlayerScore", asLocalScore, NULL );
+        }
+        if( leaderboard.scores )
+        {
+            FREObject asScores;
+            if ( FRENewObject( ASVectorScore, 0, NULL, &asScores, NULL ) == FRE_OK && FRESetArrayLength( asScores, leaderboard.scores.count ) == FRE_OK )
+            {
+                int nextIndex = 0;
+                for( GKScore* score in leaderboard.scores )
+                {
+                    GKPlayer* player = [names valueForKey:score.playerID];
+                    if( player != nil )
+                    {
+                        FREObject asScore;
+                        if( FRENewObjectFromGKScore( score, player, &asScore ) == FRE_OK )
+                        {
+                            FRESetArrayElementAt( asScores, nextIndex, asScore );
+                            ++nextIndex;
+                        }
+                    }
+                }
+                FRESetObjectProperty( asLeaderboard, "scores", asScores, NULL );
+            }
+        }
+        [leaderboardWithNames release];
+        return asLeaderboard;
+    }
+    [leaderboardWithNames release];
+    return NULL;
+}
+
 DEFINE_ANE_FUNCTION( getStoredPlayers )
 {
-    uint32_t length = 0;
-    const uint8_t* keyValue = NULL;
-    if( FREGetObjectAsUTF8( argv[0], &length, &keyValue ) != FRE_OK ) return NULL;
-    NSString* key = [NSString stringWithUTF8String: (char*) keyValue];
+    NSString* key;
+    if( FREGetObjectAsString( argv[0], &key ) != FRE_OK ) return NULL;
+
     NSArray* friendDetails = getReturnObject( key );
     if( friendDetails == nil )
     {
         return NULL;
     }
-    NSLog( @"Friends %@", friendDetails );
     FREObject friends;
     if ( FRENewObject( "Array", 0, NULL, &friends, NULL ) == FRE_OK && FRESetArrayLength( friends, friendDetails.count ) == FRE_OK )
     {
@@ -448,14 +569,7 @@ DEFINE_ANE_FUNCTION( getStoredPlayers )
         for( GKPlayer* friend in friendDetails )
         {
             FREObject asPlayer;
-            FREObject playerId;
-            FREObject alias;
-            FREObject isFriend;
-            if( FRENewObject( ASPlayer, 0, NULL, &asPlayer, NULL ) == FRE_OK 
-               && FRENewObjectFromUTF8( friend.playerID.length, (uint8_t*) friend.playerID.UTF8String, &playerId ) == FRE_OK && FRESetObjectProperty( asPlayer, "id", playerId, NULL ) == FRE_OK
-               && FRENewObjectFromUTF8( friend.alias.length, (uint8_t*) friend.alias.UTF8String, &alias ) == FRE_OK && FRESetObjectProperty( asPlayer, "alias", alias, NULL ) == FRE_OK
-               && FRENewObjectFromBool( friend.isFriend, &isFriend ) == FRE_OK && FRESetObjectProperty( asPlayer, "isFriend", isFriend, NULL ) == FRE_OK
-               )
+            if( FRENewObjectFromGKPlayer( friend, &asPlayer ) == FRE_OK )
             {
                 FRESetArrayElementAt( friends, nextIndex, asPlayer );
                 ++nextIndex;
@@ -484,6 +598,8 @@ void GameCenterContextInitializer( void* extData, const uint8_t* ctxType, FRECon
         MAP_FUNCTION( showStandardAchievements, NULL ),
         MAP_FUNCTION( getLocalPlayerFriends, NULL ),
         MAP_FUNCTION( getLocalPlayerScore, NULL ),
+        MAP_FUNCTION( getLeaderboard, NULL ),
+        MAP_FUNCTION( getStoredLeaderboard, NULL ),
         MAP_FUNCTION( getStoredLocalPlayerScore, NULL ),
         MAP_FUNCTION( getStoredPlayers, NULL )
     };

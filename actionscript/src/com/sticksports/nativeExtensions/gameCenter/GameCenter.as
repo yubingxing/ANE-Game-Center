@@ -10,6 +10,8 @@ package com.sticksports.nativeExtensions.gameCenter
 		public static var localPlayerNotAuthenticated : Signal = new Signal();
 		public static var localPlayerFriendsLoadComplete : Signal = new Signal( Array );
 		public static var localPlayerFriendsLoadFailed : Signal = new Signal();
+		public static var leaderboardLoadComplete : Signal = new Signal( GCLeaderboard );
+		public static var leaderboardLoadFailed : Signal = new Signal();
 		public static var localPlayerScoreLoadComplete : Signal = new Signal( GCLeaderboard );
 		public static var localPlayerScoreLoadFailed : Signal = new Signal();
 		public static var localPlayerScoreReported : Signal = new Signal();
@@ -112,6 +114,20 @@ package com.sticksports.nativeExtensions.gameCenter
 				case InternalMessages.gameCenterViewRemoved :
 					gameCenterViewRemoved.dispatch();
 					break;
+				case InternalMessages.loadLeaderboardComplete :
+					var leaderboard : GCLeaderboard = getStoredLeaderboard( event.code );
+					if( leaderboard )
+					{
+						leaderboardLoadComplete.dispatch( leaderboard );
+					}
+					else
+					{
+						leaderboardLoadFailed.dispatch();
+					}
+					break;
+				case InternalMessages.loadLeaderboardFailed :
+					leaderboardLoadFailed.dispatch();
+					break;
 			}
 		}
 		
@@ -187,7 +203,7 @@ package com.sticksports.nativeExtensions.gameCenter
 		}
 		
 		/**
-		 * Report a score to Game Kit
+		 * Report a score to Game Center
 		 */
 		public static function reportScore( category : String, value : int ) : void
 		{
@@ -199,7 +215,7 @@ package com.sticksports.nativeExtensions.gameCenter
 		}
 		
 		/**
-		 * Report a achievement to Game Kit
+		 * Report a achievement to Game Center
 		 */
 		public static function reportAchievement( category : String, value : Number ) : void
 		{
@@ -264,6 +280,20 @@ package com.sticksports.nativeExtensions.gameCenter
 			}
 		}
 		
+		public static function getLeaderboard( category : String, playerScope : int = 0, timeScope : int = 2, rangeStart : int = 1, rangeLength : int = 25 ) : void
+		{
+			assertIsAuthenticated();
+			if( localPlayer )
+			{
+				extensionContext.call( NativeMethods.getLeaderboard, category, playerScope, timeScope, rangeStart, rangeLength );
+			}
+		}
+		
+		private static function getStoredLeaderboard( key : String ) : GCLeaderboard
+		{
+			return extensionContext.call( NativeMethods.getStoredLeaderboard, key ) as GCLeaderboard;
+		}
+		
 		private static function getReturnedLocalPlayerScore( key : String ) : GCLeaderboard
 		{
 			return extensionContext.call( NativeMethods.getStoredLocalPlayerScore, key ) as GCLeaderboard;
@@ -288,6 +318,8 @@ package com.sticksports.nativeExtensions.gameCenter
 			localPlayerNotAuthenticated.removeAll();
 			localPlayerFriendsLoadComplete.removeAll();
 			localPlayerFriendsLoadFailed.removeAll();
+			leaderboardLoadComplete.removeAll();
+			leaderboardLoadFailed.removeAll();
 			localPlayerScoreLoadComplete.removeAll();
 			localPlayerScoreLoadFailed.removeAll();
 			localPlayerScoreReported.removeAll();

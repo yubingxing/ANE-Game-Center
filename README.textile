@@ -4,7 +4,7 @@ This is an "Air native extension":http://www.adobe.com/devnet/air/native-extensi
 
 h3. Version
 
-This is version 0.5 of this extension.
+This is version 0.6 of this extension.
 
 h3. Binary files
 
@@ -108,6 +108,20 @@ Shows Apple's standard leaderboard view.
 
 When the view is closed, dispatches the signal
 * @GameCenter.gameCenterViewRemoved@
+
+Throws an error if Game Center is not supported or the local player has not been authenticated.
+
+h4. Get a leaderboard
+
+@GameCenter.getLeaderboard( "leaderboard" );@
+
+Returns the leaderboard as an Actionscript object for custom rendering within your game.
+
+Is asynchronous.
+
+Dispatches one of two signals
+* @GameCenter.leaderboardLoadComplete@ with parameter of type GCLeaderboard
+* @GameCenter.leaderboardScoreLoadFailed@
 
 Throws an error if Game Center is not supported or the local player has not been authenticated.
 

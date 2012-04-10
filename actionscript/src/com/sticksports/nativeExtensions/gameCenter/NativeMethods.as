@@ -15,6 +15,8 @@ package com.sticksports.nativeExtensions.gameCenter
 		internal static const showStandardAchievements : String = "showStandardAchievements";
 		internal static const getLocalPlayerFriends : String = "getLocalPlayerFriends";
 		internal static const getLocalPlayerScore : String = "getLocalPlayerScore";
+		internal static const getLeaderboard : String = "getLeaderboard";
+		internal static const getStoredLeaderboard : String = "getStoredLeaderboard";
 		internal static const getStoredLocalPlayerScore : String = "getStoredLocalPlayerScore";
 		internal static const getStoredPlayers : String = "getStoredPlayers";
 	}

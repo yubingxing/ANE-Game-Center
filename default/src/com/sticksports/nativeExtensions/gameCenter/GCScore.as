@@ -6,7 +6,7 @@ package com.sticksports.nativeExtensions.gameCenter
 		public var value : int;
 		public var formattedValue : String;
 		public var date : Date;
-		public var playerId : String;
+		public var player : GCPlayer;
 		public var rank : int;
 	}
 }

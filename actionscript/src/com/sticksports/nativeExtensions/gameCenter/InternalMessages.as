@@ -15,6 +15,8 @@ package com.sticksports.nativeExtensions.gameCenter
 		internal static const loadFriendsFailed : String = "LoadFriendsFailed";
 		internal static const loadLocalPlayerScoreComplete : String = "LoadLocalPlayerScoreComplete";
 		internal static const loadLocalPlayerScoreFailed : String = "LoadLocalPlayerScoreFailed";
+		internal static const loadLeaderboardComplete : String = "LoadLeaderboardComplete";
+		internal static const loadLeaderboardFailed : String = "LoadLeaderboardFailed";
 		internal static const gameCenterViewRemoved : String = "GameCenterViewRemoved";
 		
 		// Error messages dispatched from here

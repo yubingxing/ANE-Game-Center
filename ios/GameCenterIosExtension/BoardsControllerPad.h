@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Stick Sports Ltd. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import <GameKit/GameKit.h>
 #import "FlashRuntimeExtensions.h"
 #import "BoardsController.h"

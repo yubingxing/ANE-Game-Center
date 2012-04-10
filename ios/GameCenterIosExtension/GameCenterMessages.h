@@ -21,10 +21,13 @@
 #define loadFriendsFailed "LoadFriendsFailed"
 #define loadLocalPlayerScoreComplete "LoadLocalPlayerScoreComplete"
 #define loadLocalPlayerScoreFailed "LoadLocalPlayerScoreFailed"
+#define loadLeaderboardComplete "LoadLeaderboardComplete"
+#define loadLeaderboardFailed "LoadLeaderboardFailed"
 
 #define ASLocalPlayer "com.sticksports.nativeExtensions.gameCenter.GCLocalPlayer"
 #define ASPlayer "com.sticksports.nativeExtensions.gameCenter.GCPlayer"
 #define ASScore "com.sticksports.nativeExtensions.gameCenter.GCScore"
 #define ASLeaderboard "com.sticksports.nativeExtensions.gameCenter.GCLeaderboard"
+#define ASVectorScore "Vector.<com.sticksports.nativeExtensions.gameCenter.GCScore>"
 
 #endif

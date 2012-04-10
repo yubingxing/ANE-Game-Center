@@ -2,7 +2,9 @@
 {
 	import com.sticksports.nativeExtensions.gameCenter.GCLeaderboard;
 	import com.sticksports.nativeExtensions.gameCenter.GCPlayer;
+	import com.sticksports.nativeExtensions.gameCenter.GCScore;
 	import com.sticksports.nativeExtensions.gameCenter.GameCenter;
+
 	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -103,8 +105,14 @@
 			tf.addEventListener( MouseEvent.MOUSE_DOWN, showAchievements );
 			addChild( tf );
 			
-			tf = createButton( "getFriends" );
+			tf = createButton( "getLeaderboard" );
 			tf.x = 10;
+			tf.y = 170;
+			tf.addEventListener( MouseEvent.MOUSE_DOWN, getLeaderboard );
+			addChild( tf );
+			
+			tf = createButton( "getFriends" );
+			tf.x = 170;
 			tf.y = 170;
 			tf.addEventListener( MouseEvent.MOUSE_DOWN, getFriends );
 			addChild( tf );
@@ -218,7 +226,8 @@
 			feedback.appendText( "\n    rankMax : " + leaderboard.rangeMax );
 			if( leaderboard.localPlayerScore )
 			{
-				feedback.appendText( "\n    playerId : " + leaderboard.localPlayerScore.playerId );
+				feedback.appendText( "\n    playerId : " + leaderboard.localPlayerScore.player.id );
+				feedback.appendText( "\n    playerName : " + leaderboard.localPlayerScore.player.alias );
 				feedback.appendText( "\n    rank : " + leaderboard.localPlayerScore.rank );
 				feedback.appendText( "\n    value : " + leaderboard.localPlayerScore.value );
 				feedback.appendText( "\n    formattedValue : " + leaderboard.localPlayerScore.formattedValue );
@@ -231,6 +240,74 @@
 		}
 		
 		private function localPlayerScoreFailed() : void
+		{
+			GameCenter.localPlayerScoreLoadComplete.remove( localPlayerScoreLoaded );
+			GameCenter.localPlayerScoreLoadFailed.remove( localPlayerScoreFailed );
+			feedback.appendText( "\n  localPlayerScoreLoadFailed" );
+		}
+
+		private function getLeaderboard( event : MouseEvent ) : void
+		{
+			feedback.text = "GameCenter.getLeaderboard()";
+			try
+			{
+				GameCenter.leaderboardLoadComplete.add( leaderboardLoaded );
+				GameCenter.leaderboardLoadFailed.add( leaderboardFailed );
+				GameCenter.getLeaderboard( "HighScore" );
+			}
+			catch( error : Error )
+			{
+				GameCenter.leaderboardLoadComplete.remove( leaderboardLoaded );
+				GameCenter.leaderboardLoadFailed.remove( leaderboardFailed );
+				feedback.appendText( "\n  " + error.message );
+			}
+		}
+		
+		private function leaderboardLoaded( leaderboard : GCLeaderboard ) : void
+		{
+			GameCenter.leaderboardLoadComplete.remove( leaderboardLoaded );
+			GameCenter.leaderboardLoadFailed.remove( leaderboardFailed );
+			feedback.appendText( "\n  leaderboardLoadComplete" );
+			feedback.appendText( "\n    board category : " + leaderboard.category );
+			feedback.appendText( "\n    board title : " + leaderboard.title );
+			feedback.appendText( "\n    rangeStart : " + leaderboard.rangeStart );
+			feedback.appendText( "\n    rangeLength : " + leaderboard.rangeLength );
+			feedback.appendText( "\n    rankMax : " + leaderboard.rangeMax );
+			if( leaderboard.localPlayerScore )
+			{
+				feedback.appendText( "\n    localPlayerScore : " );
+				feedback.appendText( "\n      player.id : " + leaderboard.localPlayerScore.player.id );
+				feedback.appendText( "\n      player.alias : " + leaderboard.localPlayerScore.player.alias );
+				feedback.appendText( "\n      rank : " + leaderboard.localPlayerScore.rank );
+				feedback.appendText( "\n      value : " + leaderboard.localPlayerScore.value );
+				feedback.appendText( "\n      formattedValue : " + leaderboard.localPlayerScore.formattedValue );
+				feedback.appendText( "\n      date : " + leaderboard.localPlayerScore.date );
+			}
+			else
+			{
+				feedback.appendText( "\n    no score for local player" );
+			}
+			if( leaderboard.scores )
+			{
+				feedback.appendText( "\n    scores : " );
+				for each( var score : GCScore in leaderboard.scores )
+				{
+					feedback.appendText( "\n      player.id : " + score.player.id );
+					feedback.appendText( "\n        player.alias : " + score.player.alias );
+					feedback.appendText( "\n        player.isFriend : " + score.player.isFriend );
+					feedback.appendText( "\n        rank : " + score.rank );
+					feedback.appendText( "\n        value : " + score.value );
+					feedback.appendText( "\n        formattedValue : " + score.formattedValue );
+					feedback.appendText( "\n        date : " + score.date );
+				}
+			}
+			else
+			{
+				feedback.appendText( "\n    no scores in leaderboard" );
+			}
+		}
+		
+		private function leaderboardFailed() : void
 		{
 			GameCenter.localPlayerScoreLoadComplete.remove( localPlayerScoreLoaded );
 			GameCenter.localPlayerScoreLoadFailed.remove( localPlayerScoreFailed );

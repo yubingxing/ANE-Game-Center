@@ -8,7 +8,9 @@ package com.sticksports.nativeExtensions.gameCenter
 		public static var localPlayerNotAuthenticated : Signal = new Signal();
 		public static var localPlayerFriendsLoadComplete : Signal = new Signal( Array );
 		public static var localPlayerFriendsLoadFailed : Signal = new Signal();
-		public static var localPlayerScoreLoadComplete : Signal = new Signal( GCScore );
+		public static var leaderboardLoadComplete : Signal = new Signal( GCLeaderboard );
+		public static var leaderboardLoadFailed : Signal = new Signal();
+		public static var localPlayerScoreLoadComplete : Signal = new Signal( GCLeaderboard );
 		public static var localPlayerScoreLoadFailed : Signal = new Signal();
 		public static var localPlayerScoreReported : Signal = new Signal();
 		public static var localPlayerScoreReportFailed : Signal = new Signal();
@@ -89,6 +91,11 @@ package com.sticksports.nativeExtensions.gameCenter
 		}
 		
 		public static function getLocalPlayerScore( category : String, playerScope : int = 0, timeScope : int = 2 ) : void
+		{
+			throwNotSupportedError();
+		}
+
+		public static function getLeaderboard( category : String, playerScope : int = 0, timeScope : int = 2, rangeStart : int = 1, rangeLength : int = 25 ) : void
 		{
 			throwNotSupportedError();
 		}

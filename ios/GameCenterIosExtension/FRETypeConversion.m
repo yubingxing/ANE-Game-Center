@@ -7,18 +7,25 @@
 //
 
 #import "FRETypeConversion.h"
-/*
-FREResult FREGetObjectAsNSString( FREObject object, NSString* value )
+
+FREResult FREGetObjectAsString( FREObject object, NSString** value )
 {
     FREResult result;
     uint32_t length = 0;
-    const uint8_t* utf8Value = NULL;
-    result = FREGetObjectAsUTF8( object, &length, &utf8Value );
+    const uint8_t* tempValue = NULL;
+    
+    result = FREGetObjectAsUTF8( object, &length, &tempValue );
     if( result != FRE_OK ) return result;
-    value = [NSString stringWithUTF8String: (char*) utf8Value];
+    
+    *value = [NSString stringWithUTF8String: (char*) tempValue];
     return FRE_OK;
 }
-*/
+
+FREResult FRENewObjectFromString( NSString* string, FREObject* asString )
+{
+    return FRENewObjectFromUTF8( string.length, (uint8_t*) string.UTF8String, asString );
+}
+
 FREResult FRENewObjectFromDate( NSDate* date, FREObject* asDate )
 {
     NSTimeInterval timestamp = date.timeIntervalSince1970 * 1000;
@@ -29,6 +36,61 @@ FREResult FRENewObjectFromDate( NSDate* date, FREObject* asDate )
     result = FRENewObject( "Date", 0, NULL, asDate, NULL );
     if( result != FRE_OK ) return result;
     result = FRESetObjectProperty( *asDate, "time", time, NULL);
+    if( result != FRE_OK ) return result;
+    return FRE_OK;
+}
+
+FREResult FRESetObjectPropertyString( FREObject asObject, const uint8_t* propertyName, NSString* value )
+{
+    FREResult result;
+    FREObject asValue;
+    result = FRENewObjectFromString( value, &asValue );
+    if( result != FRE_OK ) return result;
+    result = FRESetObjectProperty( asObject, propertyName, asValue, NULL );
+    if( result != FRE_OK ) return result;
+    return FRE_OK;
+}
+
+FREResult FRESetObjectPropertyBool( FREObject asObject, const uint8_t* propertyName, uint32_t value )
+{
+    FREResult result;
+    FREObject asValue;
+    result = FRENewObjectFromBool( value, &asValue );
+    if( result != FRE_OK ) return result;
+    result = FRESetObjectProperty( asObject, propertyName, asValue, NULL );
+    if( result != FRE_OK ) return result;
+    return FRE_OK;
+}
+
+FREResult FRESetObjectPropertyInt( FREObject asObject, const uint8_t* propertyName, int32_t value )
+{
+    FREResult result;
+    FREObject asValue;
+    result = FRENewObjectFromInt32( value, &asValue );
+    if( result != FRE_OK ) return result;
+    result = FRESetObjectProperty( asObject, propertyName, asValue, NULL );
+    if( result != FRE_OK ) return result;
+    return FRE_OK;
+}
+
+FREResult FRESetObjectPropertyNum( FREObject asObject, const uint8_t* propertyName, double value )
+{
+    FREResult result;
+    FREObject asValue;
+    result = FRENewObjectFromDouble( value, &asValue );
+    if( result != FRE_OK ) return result;
+    result = FRESetObjectProperty( asObject, propertyName, asValue, NULL );
+    if( result != FRE_OK ) return result;
+    return FRE_OK;
+}
+
+FREResult FRESetObjectPropertyDate( FREObject asObject, const uint8_t* propertyName, NSDate* value )
+{
+    FREResult result;
+    FREObject asValue;
+    result = FRENewObjectFromDate( value, &asValue );
+    if( result != FRE_OK ) return result;
+    result = FRESetObjectProperty( asObject, propertyName, asValue, NULL );
     if( result != FRE_OK ) return result;
     return FRE_OK;
 }

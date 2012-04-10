@@ -10,6 +10,8 @@
 		798B422C1467CE5700F01668 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 798B422B1467CE5700F01668 /* Foundation.framework */; };
 		798B42391467CE9900F01668 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 798B42381467CE9900F01668 /* GameKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		798B423B1467CF0F00F01668 /* FlashRuntimeExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = 798B423A1467CF0F00F01668 /* FlashRuntimeExtensions.h */; };
+		79ED079C152B5E40006EA7E5 /* LeaderboardWithNames.h in Headers */ = {isa = PBXBuildFile; fileRef = 79ED079A152B5E40006EA7E5 /* LeaderboardWithNames.h */; };
+		79ED079D152B5E40006EA7E5 /* LeaderboardWithNames.m in Sources */ = {isa = PBXBuildFile; fileRef = 79ED079B152B5E40006EA7E5 /* LeaderboardWithNames.m */; };
 		79FA57BE14F01DE8002FB6AF /* BoardsController.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57B914F01DE8002FB6AF /* BoardsController.h */; };
 		79FA57BF14F01DE8002FB6AF /* BoardsControllerPad.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57BA14F01DE8002FB6AF /* BoardsControllerPad.h */; };
 		79FA57C014F01DE8002FB6AF /* BoardsControllerPad.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FA57BB14F01DE8002FB6AF /* BoardsControllerPad.m */; };
@@ -27,6 +29,8 @@
 		798B422B1467CE5700F01668 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		798B42381467CE9900F01668 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		798B423A1467CF0F00F01668 /* FlashRuntimeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlashRuntimeExtensions.h; sourceTree = "<group>"; };
+		79ED079A152B5E40006EA7E5 /* LeaderboardWithNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeaderboardWithNames.h; sourceTree = "<group>"; };
+		79ED079B152B5E40006EA7E5 /* LeaderboardWithNames.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeaderboardWithNames.m; sourceTree = "<group>"; };
 		79FA57B914F01DE8002FB6AF /* BoardsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoardsController.h; sourceTree = SOURCE_ROOT; };
 		79FA57BA14F01DE8002FB6AF /* BoardsControllerPad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoardsControllerPad.h; sourceTree = SOURCE_ROOT; };
 		79FA57BB14F01DE8002FB6AF /* BoardsControllerPad.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BoardsControllerPad.m; sourceTree = SOURCE_ROOT; };
@@ -57,6 +61,8 @@
 			children = (
 				798B423A1467CF0F00F01668 /* FlashRuntimeExtensions.h */,
 				79FA57B914F01DE8002FB6AF /* BoardsController.h */,
+				79ED079A152B5E40006EA7E5 /* LeaderboardWithNames.h */,
+				79ED079B152B5E40006EA7E5 /* LeaderboardWithNames.m */,
 				79FA57C414F01E04002FB6AF /* FRETypeConversion.h */,
 				79FA57C514F01E04002FB6AF /* FRETypeConversion.m */,
 				79FA57C614F01E04002FB6AF /* GameCenterIosExtension-Prefix.pch */,
@@ -102,6 +108,7 @@
 				79FA57C914F01E04002FB6AF /* FRETypeConversion.h in Headers */,
 				79FA57CB14F01E04002FB6AF /* GameCenterIosExtension-Prefix.pch in Headers */,
 				79FA57CD14F01E04002FB6AF /* GameCenterMessages.h in Headers */,
+				79ED079C152B5E40006EA7E5 /* LeaderboardWithNames.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,7 +138,7 @@
 		798B421F1467CE5700F01668 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 				ORGANIZATIONNAME = "Stick Sports Ltd";
 			};
 			buildConfigurationList = 798B42221467CE5700F01668 /* Build configuration list for PBXProject "GameCenterIosExtension" */;
@@ -160,6 +167,7 @@
 				79FA57C214F01DE8002FB6AF /* BoardsControllerPhone.m in Sources */,
 				79FA57CA14F01E04002FB6AF /* FRETypeConversion.m in Sources */,
 				79FA57CC14F01E04002FB6AF /* GameCenterIosExtension.m in Sources */,
+				79ED079D152B5E40006EA7E5 /* LeaderboardWithNames.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
