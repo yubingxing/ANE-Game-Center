@@ -498,9 +498,7 @@ DEFINE_ANE_FUNCTION( getStoredLeaderboard )
 
     LeaderboardWithNames* leaderboardWithNames = getReturnObject( key );
     GKLeaderboard* leaderboard = leaderboardWithNames.leaderboard;
-    NSLog( @"read leaderboard %d", leaderboard.retainCount );
     NSDictionary* names = leaderboardWithNames.names;
-    NSLog( @"read names %d", names.retainCount );
     
     if( leaderboard == nil || names == nil )
     {
