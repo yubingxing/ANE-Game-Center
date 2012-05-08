@@ -1,24 +1,26 @@
 package com.sticksports.nativeExtensions.gameCenter
 {
+	import com.sticksports.nativeExtensions.gameCenter.signals.GCSignal0;
+	import com.sticksports.nativeExtensions.gameCenter.signals.GCSignal1;
+
 	import flash.events.StatusEvent;
 	import flash.external.ExtensionContext;
-	import org.osflash.signals.Signal;
 
 	public class GameCenter
 	{
-		public static var localPlayerAuthenticated : Signal = new Signal();
-		public static var localPlayerNotAuthenticated : Signal = new Signal();
-		public static var localPlayerFriendsLoadComplete : Signal = new Signal( Array );
-		public static var localPlayerFriendsLoadFailed : Signal = new Signal();
-		public static var leaderboardLoadComplete : Signal = new Signal( GCLeaderboard );
-		public static var leaderboardLoadFailed : Signal = new Signal();
-		public static var localPlayerScoreLoadComplete : Signal = new Signal( GCLeaderboard );
-		public static var localPlayerScoreLoadFailed : Signal = new Signal();
-		public static var localPlayerScoreReported : Signal = new Signal();
-		public static var localPlayerScoreReportFailed : Signal = new Signal();
-		public static var localPlayerAchievementReported : Signal = new Signal();
-		public static var localPlayerAchievementReportFailed : Signal = new Signal();
-		public static var gameCenterViewRemoved : Signal = new Signal();
+		public static var localPlayerAuthenticated : GCSignal0 = new GCSignal0();
+		public static var localPlayerNotAuthenticated : GCSignal0 = new GCSignal0();
+		public static var localPlayerFriendsLoadComplete : GCSignal1 = new GCSignal1( Array );
+		public static var localPlayerFriendsLoadFailed : GCSignal0 = new GCSignal0();
+		public static var leaderboardLoadComplete : GCSignal1 = new GCSignal1( GCLeaderboard );
+		public static var leaderboardLoadFailed : GCSignal0 = new GCSignal0();
+		public static var localPlayerScoreLoadComplete : GCSignal1 = new GCSignal1( GCLeaderboard );
+		public static var localPlayerScoreLoadFailed : GCSignal0 = new GCSignal0();
+		public static var localPlayerScoreReported : GCSignal0 = new GCSignal0();
+		public static var localPlayerScoreReportFailed : GCSignal0 = new GCSignal0();
+		public static var localPlayerAchievementReported : GCSignal0 = new GCSignal0();
+		public static var localPlayerAchievementReportFailed : GCSignal0 = new GCSignal0();
+		public static var gameCenterViewRemoved : GCSignal0 = new GCSignal0();
 		
 		public static var isAuthenticating : Boolean;
 		
@@ -305,7 +307,7 @@ package com.sticksports.nativeExtensions.gameCenter
 		}
 
 		/**
-		 * Clean up the extension - only if you no longer need it or want to free memory.
+		 * Clean up the extension - only if you no longer need it or want to free memory. All listeners will be removed.
 		 */
 		public static function dispose() : void
 		{
