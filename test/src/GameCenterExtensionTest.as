@@ -13,7 +13,6 @@
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
 
-	
 	[SWF(width='320', height='480', frameRate='30', backgroundColor='#000000')]
 	
 	public class GameCenterExtensionTest extends Sprite
@@ -23,6 +22,8 @@
 		private var feedback : TextField;
 		
 		private var buttonFormat : TextFormat;
+		private var leaderboardName : String = "highscores";
+		private var achievementName : String = "started";
 		
 		public function GameCenterExtensionTest()
 		{
@@ -206,7 +207,7 @@
 			{
 				GameCenter.localPlayerScoreLoadComplete.add( localPlayerScoreLoaded );
 				GameCenter.localPlayerScoreLoadFailed.add( localPlayerScoreFailed );
-				GameCenter.getLocalPlayerScore( "HighScore" );
+				GameCenter.getLocalPlayerScore( leaderboardName );
 			}
 			catch( error : Error )
 			{
@@ -253,7 +254,7 @@
 			{
 				GameCenter.leaderboardLoadComplete.add( leaderboardLoaded );
 				GameCenter.leaderboardLoadFailed.add( leaderboardFailed );
-				GameCenter.getLeaderboard( "HighScore" );
+				GameCenter.getLeaderboard( leaderboardName );
 			}
 			catch( error : Error )
 			{
@@ -309,9 +310,9 @@
 		
 		private function leaderboardFailed() : void
 		{
-			GameCenter.localPlayerScoreLoadComplete.remove( localPlayerScoreLoaded );
-			GameCenter.localPlayerScoreLoadFailed.remove( localPlayerScoreFailed );
-			feedback.appendText( "\n  localPlayerScoreLoadFailed" );
+			GameCenter.leaderboardLoadComplete.remove( leaderboardFailed );
+			GameCenter.leaderboardLoadFailed.remove( leaderboardFailed );
+			feedback.appendText( "\n  leaderboardLoadFailed" );
 		}
 		
 		private function submitScore( event : MouseEvent ) : void
@@ -321,7 +322,7 @@
 			{
 				GameCenter.localPlayerScoreReported.add( scoreReportSuccess );
 				GameCenter.localPlayerScoreReportFailed.add( scoreReportFailed );
-				GameCenter.reportScore( "HighScore", 180 );
+				GameCenter.reportScore( leaderboardName, 220 );
 			}
 			catch( error : Error )
 			{
@@ -350,7 +351,7 @@
 			{
 				GameCenter.localPlayerAchievementReported.add( achievementReportSuccess );
 				GameCenter.localPlayerAchievementReportFailed.add( achievementReportFailed );
-				GameCenter.reportAchievement( "started", 1 );
+				GameCenter.reportAchievement( achievementName, 1 );
 			}
 			catch( error : Error )
 			{

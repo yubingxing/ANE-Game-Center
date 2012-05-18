@@ -17,7 +17,6 @@
 			<arg line='-debug=true'/>
 			<arg line='-optimize=true'/>
 			<arg line='-swf-version=13'/>
-			<arg line='-library-path+="../../libs"'/>
 			<arg line='-external-library-path+="../../bin/GameCenter.swc"'/>
 			<arg line='-output GameCenterExtensionTest.swf'/>
 			<arg line='../src/GameCenterExtensionTest.as'/>

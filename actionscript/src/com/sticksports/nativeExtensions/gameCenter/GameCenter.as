@@ -53,7 +53,7 @@ package com.sticksports.nativeExtensions.gameCenter
 		
 		private static function handleStatusEvent( event : StatusEvent ) : void
 		{
-			trace( "internal event", event.level );
+			//trace( "internal event", event.level );
 			switch( event.level )
 			{
 				case InternalMessages.localPlayerAuthenticated :
