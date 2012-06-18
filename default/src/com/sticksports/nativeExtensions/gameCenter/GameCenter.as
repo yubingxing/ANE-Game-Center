@@ -17,6 +17,8 @@ package com.sticksports.nativeExtensions.gameCenter
 		public static var localPlayerScoreReportFailed : GCSignal0 = new GCSignal0();
 		public static var localPlayerAchievementReported : GCSignal0 = new GCSignal0();
 		public static var localPlayerAchievementReportFailed : GCSignal0 = new GCSignal0();
+		public static var achievementsLoadComplete : GCSignal1 = new GCSignal1( Vector );
+		public static var achievementsLoadFailed : GCSignal0 = new GCSignal0();
 		public static var gameCenterViewRemoved : GCSignal0 = new GCSignal0();
 		
 		public static var isAuthenticating : Boolean;
@@ -101,6 +103,11 @@ package com.sticksports.nativeExtensions.gameCenter
 			throwNotSupportedError();
 		}
 		
+		public static function getAchievements() : void
+		{
+			throwNotSupportedError();
+		}
+
 		/**
 		 * Clean up the extension - only if you no longer need it or want to free memory.
 		 */
@@ -116,6 +123,10 @@ package com.sticksports.nativeExtensions.gameCenter
 			localPlayerScoreReportFailed.removeAll();
 			localPlayerAchievementReported.removeAll();
 			localPlayerAchievementReportFailed.removeAll();
+			leaderboardLoadComplete.removeAll();
+			leaderboardLoadFailed.removeAll();
+			achievementsLoadComplete.removeAll();
+			achievementsLoadFailed.removeAll();
 			gameCenterViewRemoved.removeAll();
 		}
 	}

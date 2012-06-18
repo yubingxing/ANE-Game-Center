@@ -2,7 +2,6 @@ package com.sticksports.nativeExtensions.gameCenter
 {
 	internal class NativeMethods
 	{
-		internal static const initNativeCode : String = "initNativeCode";
 		internal static const isSupported : String = "isSupported";
 		internal static const authenticateLocalPlayer : String = "authenticateLocalPlayer";
 		internal static const getLocalPlayer : String = "getLocalPlayer";
@@ -19,5 +18,7 @@ package com.sticksports.nativeExtensions.gameCenter
 		internal static const getStoredLeaderboard : String = "getStoredLeaderboard";
 		internal static const getStoredLocalPlayerScore : String = "getStoredLocalPlayerScore";
 		internal static const getStoredPlayers : String = "getStoredPlayers";
+		internal static const getAchievements : String = "getAchievements";
+		internal static const getStoredAchievements : String = "getStoredAchievements";
 	}
 }

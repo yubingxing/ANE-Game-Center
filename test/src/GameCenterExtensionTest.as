@@ -1,5 +1,6 @@
 ﻿package
 {
+	import com.sticksports.nativeExtensions.gameCenter.GCAchievement;
 	import com.sticksports.nativeExtensions.gameCenter.GCLeaderboard;
 	import com.sticksports.nativeExtensions.gameCenter.GCPlayer;
 	import com.sticksports.nativeExtensions.gameCenter.GCScore;
@@ -42,9 +43,9 @@
 			format.color = 0xFFFFFF;
 			feedback.defaultTextFormat = format;
 			feedback.width = 320;
-			feedback.height = 260;
+			feedback.height = 220;
 			feedback.x = 10;
-			feedback.y = 210;
+			feedback.y = 250;
 			feedback.multiline = true;
 			feedback.wordWrap = true;
 			feedback.text = "Hello";
@@ -112,9 +113,15 @@
 			tf.addEventListener( MouseEvent.MOUSE_DOWN, getLeaderboard );
 			addChild( tf );
 			
-			tf = createButton( "getFriends" );
+			tf = createButton( "getAchievements" );
 			tf.x = 170;
 			tf.y = 170;
+			tf.addEventListener( MouseEvent.MOUSE_DOWN, getAchievements );
+			addChild( tf );
+			
+			tf = createButton( "getFriends" );
+			tf.x = 10;
+			tf.y = 210;
 			tf.addEventListener( MouseEvent.MOUSE_DOWN, getFriends );
 			addChild( tf );
 		}
@@ -397,6 +404,42 @@
 			{
 				feedback.appendText( "\n  " + error.message );
 			}
+		}
+		
+		private function getAchievements( event : MouseEvent ) : void
+		{
+			feedback.text = "GameCenter.getAchievements()";
+			try
+			{
+				GameCenter.achievementsLoadComplete.add( achievementsLoaded );
+				GameCenter.achievementsLoadFailed.add( achievementsFailed );
+				GameCenter.getAchievements();
+			}
+			catch( error : Error )
+			{
+				GameCenter.achievementsLoadComplete.remove( achievementsLoaded );
+				GameCenter.achievementsLoadFailed.remove( achievementsFailed );
+				feedback.appendText( "\n  " + error.message );
+			}
+		}
+		
+		private function achievementsLoaded( achievements : Vector.<GCAchievement> ) : void
+		{
+			GameCenter.achievementsLoadComplete.remove( achievementsLoaded );
+			GameCenter.achievementsLoadFailed.remove( achievementsFailed );
+			feedback.appendText( "\n  achievementLoadComplete" );
+			for each( var achievement : GCAchievement in achievements )
+			{
+				feedback.appendText( "\n    id : " + achievement.id );
+				feedback.appendText( "\n      value : " + achievement.value );
+			}
+		}
+		
+		private function achievementsFailed() : void
+		{
+			GameCenter.achievementsLoadComplete.remove( achievementsFailed );
+			GameCenter.achievementsLoadFailed.remove( achievementsFailed );
+			feedback.appendText( "\n  achievementLoadFailed" );
 		}
 		
 		private function getFriends( event : MouseEvent ) : void

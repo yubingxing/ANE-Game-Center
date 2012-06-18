@@ -23,11 +23,15 @@
 #define loadLocalPlayerScoreFailed "LoadLocalPlayerScoreFailed"
 #define loadLeaderboardComplete "LoadLeaderboardComplete"
 #define loadLeaderboardFailed "LoadLeaderboardFailed"
+#define loadAchievementsComplete "LoadAchievementsComplete"
+#define loadAchievementsFailed "LoadAchievementsFailed"
 
 #define ASLocalPlayer "com.sticksports.nativeExtensions.gameCenter.GCLocalPlayer"
 #define ASPlayer "com.sticksports.nativeExtensions.gameCenter.GCPlayer"
 #define ASScore "com.sticksports.nativeExtensions.gameCenter.GCScore"
+#define ASAchievement "com.sticksports.nativeExtensions.gameCenter.GCAchievement"
 #define ASLeaderboard "com.sticksports.nativeExtensions.gameCenter.GCLeaderboard"
 #define ASVectorScore "Vector.<com.sticksports.nativeExtensions.gameCenter.GCScore>"
+#define ASVectorAchievement "Vector.<com.sticksports.nativeExtensions.gameCenter.GCAchievement>"
 
 #endif

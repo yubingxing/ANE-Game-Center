@@ -20,6 +20,8 @@ package com.sticksports.nativeExtensions.gameCenter
 		public static var localPlayerScoreReportFailed : GCSignal0 = new GCSignal0();
 		public static var localPlayerAchievementReported : GCSignal0 = new GCSignal0();
 		public static var localPlayerAchievementReportFailed : GCSignal0 = new GCSignal0();
+		public static var achievementsLoadComplete : GCSignal1 = new GCSignal1( Vector );
+		public static var achievementsLoadFailed : GCSignal0 = new GCSignal0();
 		public static var gameCenterViewRemoved : GCSignal0 = new GCSignal0();
 		
 		public static var isAuthenticating : Boolean;
@@ -45,7 +47,6 @@ package com.sticksports.nativeExtensions.gameCenter
 				initialised = true;
 				
 				extensionContext = ExtensionContext.createExtensionContext( "com.sticksports.nativeExtensions.GameCenter", null );
-				extensionContext.call( NativeMethods.initNativeCode );
 				
 				extensionContext.addEventListener( StatusEvent.STATUS, handleStatusEvent );
 			}
@@ -129,6 +130,20 @@ package com.sticksports.nativeExtensions.gameCenter
 					break;
 				case InternalMessages.loadLeaderboardFailed :
 					leaderboardLoadFailed.dispatch();
+					break;
+				case InternalMessages.loadAchievementsComplete :
+					var achievements : Vector.<GCAchievement> = getStoredAchievements( event.code );
+					if( achievements )
+					{
+						achievementsLoadComplete.dispatch( achievements );
+					}
+					else
+					{
+						achievementsLoadFailed.dispatch();
+					}
+					break;
+				case InternalMessages.loadAchievementsFailed :
+					achievementsLoadFailed.dispatch();
 					break;
 			}
 		}
@@ -291,9 +306,23 @@ package com.sticksports.nativeExtensions.gameCenter
 			}
 		}
 		
+		public static function getAchievements() : void
+		{
+			assertIsAuthenticated();
+			if( localPlayer )
+			{
+				extensionContext.call( NativeMethods.getAchievements );
+			}
+		}
+		
 		private static function getStoredLeaderboard( key : String ) : GCLeaderboard
 		{
 			return extensionContext.call( NativeMethods.getStoredLeaderboard, key ) as GCLeaderboard;
+		}
+		
+		private static function getStoredAchievements( key : String ) : Vector.<GCAchievement>
+		{
+			return extensionContext.call( NativeMethods.getStoredAchievements, key ) as Vector.<GCAchievement>;
 		}
 		
 		private static function getReturnedLocalPlayerScore( key : String ) : GCLeaderboard
@@ -322,6 +351,8 @@ package com.sticksports.nativeExtensions.gameCenter
 			localPlayerFriendsLoadFailed.removeAll();
 			leaderboardLoadComplete.removeAll();
 			leaderboardLoadFailed.removeAll();
+			achievementsLoadComplete.removeAll();
+			achievementsLoadFailed.removeAll();
 			localPlayerScoreLoadComplete.removeAll();
 			localPlayerScoreLoadFailed.removeAll();
 			localPlayerScoreReported.removeAll();

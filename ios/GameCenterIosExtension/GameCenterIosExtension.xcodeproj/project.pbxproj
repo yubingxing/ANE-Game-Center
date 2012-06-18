@@ -19,7 +19,6 @@
 		79FA57C214F01DE8002FB6AF /* BoardsControllerPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FA57BD14F01DE8002FB6AF /* BoardsControllerPhone.m */; };
 		79FA57C914F01E04002FB6AF /* FRETypeConversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57C414F01E04002FB6AF /* FRETypeConversion.h */; };
 		79FA57CA14F01E04002FB6AF /* FRETypeConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FA57C514F01E04002FB6AF /* FRETypeConversion.m */; };
-		79FA57CB14F01E04002FB6AF /* GameCenterIosExtension-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57C614F01E04002FB6AF /* GameCenterIosExtension-Prefix.pch */; };
 		79FA57CC14F01E04002FB6AF /* GameCenterIosExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FA57C714F01E04002FB6AF /* GameCenterIosExtension.m */; };
 		79FA57CD14F01E04002FB6AF /* GameCenterMessages.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57C814F01E04002FB6AF /* GameCenterMessages.h */; };
 /* End PBXBuildFile section */
@@ -38,7 +37,6 @@
 		79FA57BD14F01DE8002FB6AF /* BoardsControllerPhone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BoardsControllerPhone.m; sourceTree = SOURCE_ROOT; };
 		79FA57C414F01E04002FB6AF /* FRETypeConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FRETypeConversion.h; sourceTree = "<group>"; };
 		79FA57C514F01E04002FB6AF /* FRETypeConversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FRETypeConversion.m; sourceTree = "<group>"; };
-		79FA57C614F01E04002FB6AF /* GameCenterIosExtension-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GameCenterIosExtension-Prefix.pch"; sourceTree = "<group>"; };
 		79FA57C714F01E04002FB6AF /* GameCenterIosExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameCenterIosExtension.m; sourceTree = "<group>"; };
 		79FA57C814F01E04002FB6AF /* GameCenterMessages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameCenterMessages.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -65,7 +63,6 @@
 				79ED079B152B5E40006EA7E5 /* LeaderboardWithNames.m */,
 				79FA57C414F01E04002FB6AF /* FRETypeConversion.h */,
 				79FA57C514F01E04002FB6AF /* FRETypeConversion.m */,
-				79FA57C614F01E04002FB6AF /* GameCenterIosExtension-Prefix.pch */,
 				79FA57C714F01E04002FB6AF /* GameCenterIosExtension.m */,
 				79FA57C814F01E04002FB6AF /* GameCenterMessages.h */,
 				79FA57BA14F01DE8002FB6AF /* BoardsControllerPad.h */,
@@ -106,7 +103,6 @@
 				79FA57BF14F01DE8002FB6AF /* BoardsControllerPad.h in Headers */,
 				79FA57C114F01DE8002FB6AF /* BoardsControllerPhone.h in Headers */,
 				79FA57C914F01E04002FB6AF /* FRETypeConversion.h in Headers */,
-				79FA57CB14F01E04002FB6AF /* GameCenterIosExtension-Prefix.pch in Headers */,
 				79FA57CD14F01E04002FB6AF /* GameCenterMessages.h in Headers */,
 				79ED079C152B5E40006EA7E5 /* LeaderboardWithNames.h in Headers */,
 			);
@@ -220,8 +216,8 @@
 			buildSettings = {
 				DSTROOT = /tmp/GameCenterIosExtension.dst;
 				GCC_LINK_WITH_DYNAMIC_LIBRARIES = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "GameCenterIosExtension-Prefix.pch";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -238,8 +234,8 @@
 			buildSettings = {
 				DSTROOT = /tmp/GameCenterIosExtension.dst;
 				GCC_LINK_WITH_DYNAMIC_LIBRARIES = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "GameCenterIosExtension-Prefix.pch";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
