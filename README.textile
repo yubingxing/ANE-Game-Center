@@ -4,7 +4,7 @@ This is an "Air native extension":http://www.adobe.com/devnet/air/native-extensi
 
 h3. Version
 
-This is version 0.6.1 of this extension.
+This is version 0.7.0 of this extension.
 
 h3. Binary files
 
@@ -133,6 +133,20 @@ Shows Apple's standard achievements view.
 
 When the view is closed, dispatches the signal
 * @GameCenter.gameCenterViewRemoved@
+
+Throws an error if Game Center is not supported or the local player has not been authenticated.
+
+h4. Get player achievements
+
+@GameCenter.getAchievements();@
+
+Returns the local player's achievements.
+
+Is asynchronous.
+
+Dispatches one of two signals
+* @GameCenter.achievementsLoadComplete@ with parameter of type Vector.<GCAchievement>
+* @GameCenter.achievementsLoadFailed@
 
 Throws an error if Game Center is not supported or the local player has not been authenticated.
 

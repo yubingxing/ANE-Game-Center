@@ -1,15 +1,15 @@
 //
-//  BoardsViewController.m
+//  BoardsControllerPad.m
 //  GameCenterIosExtension
 //
-//  Created by Richard Lord on 20/12/2011.
-//  Copyright (c) 2011 Stick Sports Ltd. All rights reserved.
+//  Created by Richard Lord on 01/02/2012.
+//  Copyright (c) 2012 Stick Sports Ltd. All rights reserved.
 //
 
-#import "BoardsControllerPhone.h"
-#import "GameCenterMessages.h"
+#import "GC_BoardsControllerPad.h"
+#import "GC_NativeMessages.h"
 
-@interface BoardsControllerPhone () {
+@interface BoardsControllerPad () {
 }
 
 @property (retain) UIWindow* win;
@@ -17,7 +17,7 @@
 
 @end
 
-@implementation BoardsControllerPhone
+@implementation BoardsControllerPad
 
 @synthesize win,context;
 
@@ -34,15 +34,13 @@
 
 - (void)leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController
 {
-    [self dismissModalViewControllerAnimated:YES];
-    [self.view.superview removeFromSuperview];
+    [win.rootViewController dismissModalViewControllerAnimated:YES];
     FREDispatchStatusEventAsync(context, "", gameCenterViewRemoved);
 }
 
 - (void)achievementViewControllerDidFinish:(GKLeaderboardViewController *)viewController
 {
-    [self dismissModalViewControllerAnimated:YES];
-    [self.view.superview removeFromSuperview];
+    [win.rootViewController dismissModalViewControllerAnimated:YES];
     FREDispatchStatusEventAsync(context, "", gameCenterViewRemoved);
 }
 
@@ -52,8 +50,7 @@
     if( leaderboardController != nil )
     {
         leaderboardController.leaderboardDelegate = self;
-        [win addSubview:self.view];
-        [self presentModalViewController: leaderboardController animated: YES];
+        [win.rootViewController presentModalViewController: leaderboardController animated: YES];
     }
 }
 
@@ -64,8 +61,7 @@
     {
         leaderboardController.category = category;
         leaderboardController.leaderboardDelegate = self;
-        [win addSubview:self.view];
-        [self presentModalViewController: leaderboardController animated: YES];
+        [win.rootViewController presentModalViewController: leaderboardController animated: YES];
     }
 }
 
@@ -77,8 +73,7 @@
         leaderboardController.category = category;
         leaderboardController.timeScope = timeScope;
         leaderboardController.leaderboardDelegate = self;
-        [win addSubview:self.view];
-        [self presentModalViewController: leaderboardController animated: YES];
+        [win.rootViewController presentModalViewController: leaderboardController animated: YES];
     }
 }
 
@@ -89,8 +84,7 @@
     {
         leaderboardController.timeScope = timeScope;
         leaderboardController.leaderboardDelegate = self;
-        [win addSubview:self.view];
-        [self presentModalViewController: leaderboardController animated: YES];
+        [win.rootViewController presentModalViewController: leaderboardController animated: YES];
     }
 }
 
@@ -100,8 +94,7 @@
     if( achievementController != nil )
     {
         achievementController.achievementDelegate = self;
-        [win addSubview:self.view];
-        [self presentModalViewController: achievementController animated: YES];
+        [win.rootViewController presentModalViewController: achievementController animated: YES];
     }
 }
 

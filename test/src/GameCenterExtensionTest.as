@@ -24,7 +24,7 @@
 		
 		private var buttonFormat : TextFormat;
 		private var leaderboardName : String = "highscores";
-		private var achievementName : String = "started";
+		private var achievementName : String = "dummyStarted";
 		
 		public function GameCenterExtensionTest()
 		{
@@ -329,7 +329,7 @@
 			{
 				GameCenter.localPlayerScoreReported.add( scoreReportSuccess );
 				GameCenter.localPlayerScoreReportFailed.add( scoreReportFailed );
-				GameCenter.reportScore( leaderboardName, 220 );
+				GameCenter.reportScore( leaderboardName, 50 );
 			}
 			catch( error : Error )
 			{
@@ -358,7 +358,7 @@
 			{
 				GameCenter.localPlayerAchievementReported.add( achievementReportSuccess );
 				GameCenter.localPlayerAchievementReportFailed.add( achievementReportFailed );
-				GameCenter.reportAchievement( achievementName, 1 );
+				GameCenter.reportAchievement( achievementName, 1, true );
 			}
 			catch( error : Error )
 			{

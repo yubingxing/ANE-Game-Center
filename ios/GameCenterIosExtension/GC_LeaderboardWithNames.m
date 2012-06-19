@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Stick Sports Ltd. All rights reserved.
 //
 
-#import "LeaderboardWithNames.h"
+#import "GC_LeaderboardWithNames.h"
 
 @implementation LeaderboardWithNames
 

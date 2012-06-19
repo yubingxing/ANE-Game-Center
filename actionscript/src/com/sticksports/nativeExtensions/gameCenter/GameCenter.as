@@ -234,12 +234,12 @@ package com.sticksports.nativeExtensions.gameCenter
 		/**
 		 * Report a achievement to Game Center
 		 */
-		public static function reportAchievement( category : String, value : Number ) : void
+		public static function reportAchievement( category : String, value : Number, banner : Boolean = false ) : void
 		{
 			assertIsAuthenticated();
 			if( localPlayer )
 			{
-				extensionContext.call( NativeMethods.reportAchievement, category, value );
+				extensionContext.call( NativeMethods.reportAchievement, category, value, banner );
 			}
 		}
 		

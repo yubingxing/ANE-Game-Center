@@ -2,8 +2,8 @@
 	<id>yourAppId</id>
 	<filename>GameCenterExtensionTest</filename>
 	<name>Dummy1</name>
-	<versionNumber>0.6.0</versionNumber>
-	<versionLabel>v0.6.0</versionLabel>
+	<versionNumber>0.7.0</versionNumber>
+	<versionLabel>v0.7.0</versionLabel>
 	<initialWindow>
 		<content>GameCenterExtensionTest.swf</content>
 		<visible>true</visible>

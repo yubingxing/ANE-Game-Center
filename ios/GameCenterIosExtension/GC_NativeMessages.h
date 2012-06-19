@@ -6,8 +6,8 @@
 //  Copyright (c) 2011 Stick Sports Ltd. All rights reserved.
 //
 
-#ifndef GameCenterIosExtension_GameCenterMessages_h
-#define GameCenterIosExtension_GameCenterMessages_h
+#ifndef GameCenterIosExtension_GC_NativeMessages_h
+#define GameCenterIosExtension_GC_NativeMessages_h
 
 #define notAuthenticated "NotAuthenticated"
 #define localPlayerAuthenticated "LocalPlayerAuthenticated"
@@ -25,13 +25,5 @@
 #define loadLeaderboardFailed "LoadLeaderboardFailed"
 #define loadAchievementsComplete "LoadAchievementsComplete"
 #define loadAchievementsFailed "LoadAchievementsFailed"
-
-#define ASLocalPlayer "com.sticksports.nativeExtensions.gameCenter.GCLocalPlayer"
-#define ASPlayer "com.sticksports.nativeExtensions.gameCenter.GCPlayer"
-#define ASScore "com.sticksports.nativeExtensions.gameCenter.GCScore"
-#define ASAchievement "com.sticksports.nativeExtensions.gameCenter.GCAchievement"
-#define ASLeaderboard "com.sticksports.nativeExtensions.gameCenter.GCLeaderboard"
-#define ASVectorScore "Vector.<com.sticksports.nativeExtensions.gameCenter.GCScore>"
-#define ASVectorAchievement "Vector.<com.sticksports.nativeExtensions.gameCenter.GCAchievement>"
 
 #endif

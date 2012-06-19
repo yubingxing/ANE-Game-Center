@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <GameKit/GameKit.h>
 #import "FlashRuntimeExtensions.h"
-#import "BoardsController.h"
+#import "GC_BoardsController.h"
 
 @interface BoardsControllerPhone : UIViewController <BoardsController,GKLeaderboardViewControllerDelegate,GKAchievementViewControllerDelegate>
 {

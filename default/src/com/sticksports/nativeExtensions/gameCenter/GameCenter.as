@@ -73,7 +73,7 @@ package com.sticksports.nativeExtensions.gameCenter
 		/**
 		 * Report a achievement to Game Kit
 		 */
-		public static function reportAchievement( category : String, value : Number ) : void
+		public static function reportAchievement( category : String, value : Number, banner : Boolean = false ) : void
 		{
 			throwNotSupportedError();
 		}
