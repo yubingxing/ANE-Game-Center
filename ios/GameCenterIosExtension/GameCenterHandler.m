@@ -310,7 +310,10 @@
     if( achievement )
     {
         achievement.percentComplete = value * 100;
-        achievement.showsCompletionBanner = ( banner == 1 );
+        if( [achievement respondsToSelector:@selector(showsCompletionBanner)] )
+        {
+            achievement.showsCompletionBanner = ( banner == 1 );
+        }
         [achievement reportAchievementWithCompletionHandler:^(NSError* error)
          {
              if( error == nil )
