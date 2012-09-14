@@ -8,12 +8,39 @@
 
 #import <Foundation/Foundation.h>
 #import "FlashRuntimeExtensions.h"
+#import <GameKit/GameKit.h>
 
-@interface GameCenterHandler : NSObject
-{
+@protocol GCHelperDelegate
+- (void)matchStarted;
+- (void)matchEnded;
+- (void)match:(GKMatch *)match didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID;
+- (void)inviteReceived;
+@end
+
+@interface GameCenterHandler : NSObject <GKMatchmakerViewControllerDelegate, GKMatchDelegate> {
+    BOOL gameCenterAvailable;
+    BOOL userAuthenticated;
+    
+    UIViewController *presentingViewController;
+    GKMatch *match;
+    BOOL matchStarted;
+    NSMutableDictionary *playersDict;
+    GKInvite *pendingInvite;
+    NSArray *pendingPlayersToInvite;
+    
 }
 
+@property (assign, readonly) BOOL gameCenterAvailable;
+@property (retain) UIViewController *presentingViewController;
+@property (retain) GKMatch *match;
+@property (retain) NSMutableDictionary *playersDict;
+@property (retain) GKInvite *pendingInvite;
+@property (retain) NSArray *pendingPlayersToInvite;
+
 - (id)initWithContext:(FREContext)extensionContext;
+// Add findMatch function
+- (FREObject)findMatchWithMinPlayers:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers;
+
 - (FREObject) isSupported;
 - (FREObject) authenticateLocalPlayer;
 - (FREObject) getLocalPlayer;

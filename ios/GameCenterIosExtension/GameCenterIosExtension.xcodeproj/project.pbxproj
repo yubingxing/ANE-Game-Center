@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B58A03C1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.h in Headers */ = {isa = PBXBuildFile; fileRef = 1B58A03A1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.h */; };
+		1B58A03D1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B58A03B1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.m */; };
+		1B58A0411602D58000499298 /* FRETypeConversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 1B58A03F1602D58000499298 /* FRETypeConversion.h */; };
+		1B58A0421602D58000499298 /* FRETypeConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B58A0401602D58000499298 /* FRETypeConversion.m */; };
 		798B422C1467CE5700F01668 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 798B422B1467CE5700F01668 /* Foundation.framework */; };
 		798B42391467CE9900F01668 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 798B42381467CE9900F01668 /* GameKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		798B423B1467CF0F00F01668 /* FlashRuntimeExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = 798B423A1467CF0F00F01668 /* FlashRuntimeExtensions.h */; };
@@ -26,6 +30,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1B58A03A1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GKMatchmakerViewController-LandscapeOnly.h"; sourceTree = "<group>"; };
+		1B58A03B1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GKMatchmakerViewController-LandscapeOnly.m"; sourceTree = "<group>"; };
+		1B58A03F1602D58000499298 /* FRETypeConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FRETypeConversion.h; sourceTree = "<group>"; };
+		1B58A0401602D58000499298 /* FRETypeConversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FRETypeConversion.m; sourceTree = "<group>"; };
 		798B42281467CE5700F01668 /* libGameCenterIosExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libGameCenterIosExtension.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		798B422B1467CE5700F01668 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		798B42381467CE9900F01668 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
@@ -61,6 +69,10 @@
 		798B421D1467CE5700F01668 = {
 			isa = PBXGroup;
 			children = (
+				1B58A03F1602D58000499298 /* FRETypeConversion.h */,
+				1B58A0401602D58000499298 /* FRETypeConversion.m */,
+				1B58A03A1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.h */,
+				1B58A03B1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.m */,
 				79FA57C714F01E04002FB6AF /* GameCenterIosExtension.m */,
 				79ED1B10158F61E8003B20F6 /* GameCenterHandler.h */,
 				79ED1B11158F61E8003B20F6 /* GameCenterHandler.m */,
@@ -112,6 +124,8 @@
 				79ED079C152B5E40006EA7E5 /* GC_LeaderboardWithNames.h in Headers */,
 				79ED1B0E158F5D8A003B20F6 /* GC_TypeConversion.h in Headers */,
 				79ED1B12158F61E8003B20F6 /* GameCenterHandler.h in Headers */,
+				1B58A03C1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.h in Headers */,
+				1B58A0411602D58000499298 /* FRETypeConversion.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,6 +186,8 @@
 				79ED079D152B5E40006EA7E5 /* GC_LeaderboardWithNames.m in Sources */,
 				79ED1B0F158F5D8A003B20F6 /* GC_TypeConversion.m in Sources */,
 				79ED1B13158F61E8003B20F6 /* GameCenterHandler.m in Sources */,
+				1B58A03D1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.m in Sources */,
+				1B58A0421602D58000499298 /* FRETypeConversion.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

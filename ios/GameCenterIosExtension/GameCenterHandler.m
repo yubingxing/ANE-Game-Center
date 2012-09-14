@@ -34,6 +34,13 @@
 @implementation GameCenterHandler
 
 @synthesize context, returnObjects, boardsController, converter;
+@synthesize gameCenterAvailable;
+@synthesize presentingViewController;
+@synthesize match;
+@synthesize playersDict;
+@synthesize pendingInvite;
+@synthesize pendingPlayersToInvite;
+
 
 - (id)initWithContext:(FREContext)extensionContext
 {
@@ -89,8 +96,8 @@
     NSString *reqSysVer = @"4.1";
     NSString *currSysVer = [[UIDevice currentDevice] systemVersion];
     BOOL osVersionSupported = ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending);
-    
-    uint32_t retValue = (localPlayerClassAvailable && osVersionSupported) ? 1 : 0;
+    gameCenterAvailable = localPlayerClassAvailable && osVersionSupported;
+    uint32_t retValue = gameCenterAvailable ? 1 : 0;
     
     FREObject result;
     if ( FRENewObjectFromBool(retValue, &result ) == FRE_OK )
@@ -107,6 +114,7 @@
     {
         if ( localPlayer.isAuthenticated )
         {
+            userAuthenticated = YES;
             DISPATCH_STATUS_EVENT( self.context, "", localPlayerAuthenticated );
             return NULL;
         }
@@ -115,10 +123,12 @@
             [localPlayer authenticateWithCompletionHandler:^(NSError *error) {
                 if( localPlayer.isAuthenticated )
                 {
+                    userAuthenticated = YES;
                     DISPATCH_STATUS_EVENT( self.context, "", localPlayerAuthenticated );
                 }
                 else
-                {     
+                {
+                    userAuthenticated = NO;
                     DISPATCH_STATUS_EVENT( self.context, "", localPlayerNotAuthenticated );
                 }
             }];
@@ -610,5 +620,154 @@
     return NULL;
 }
 
+#pragma mark User functions
+
+- (void)lookupPlayers {
+    
+    NSLog(@"Looking up %d players...", match.playerIDs.count);
+    [GKPlayer loadPlayersForIdentifiers:match.playerIDs withCompletionHandler:^(NSArray *players, NSError *error) {
+        
+        if (error != nil) {
+            NSLog(@"Error retrieving player info: %@", error.localizedDescription);
+            matchStarted = NO;
+            [self matchEnded];
+        } else {
+            
+            // Populate players dict
+            self.playersDict = [NSMutableDictionary dictionaryWithCapacity:players.count];
+            for (GKPlayer *player in players) {
+                NSLog(@"Found player: %@", player.alias);
+                [playersDict setObject:player forKey:player.playerID];
+            }
+            
+            // Notify delegate match can begin
+            matchStarted = YES;
+            [self matchStarted];
+            
+        }
+    }];
+    
+}
+
+- (FREObject)findMatchWithMinPlayers:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers {
+    
+    if (!gameCenterAvailable) return NULL;
+    
+    matchStarted = NO;
+    self.match = nil;
+    self.presentingViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+
+    
+    if (pendingInvite != nil) {
+        
+        [presentingViewController dismissModalViewControllerAnimated:NO];
+        GKMatchmakerViewController *mmvc = [[[GKMatchmakerViewController alloc] initWithInvite:pendingInvite] autorelease];
+        mmvc.matchmakerDelegate = self;
+        [presentingViewController presentModalViewController:mmvc animated:YES];
+        
+        self.pendingInvite = nil;
+        self.pendingPlayersToInvite = nil;
+        
+    } else {
+        
+        [presentingViewController dismissModalViewControllerAnimated:NO];
+        GKMatchRequest *request = [[[GKMatchRequest alloc] init] autorelease];
+        uint32_t tmp = 0;
+        FREGetObjectAsInt32(minPlayers, tmp);
+        request.minPlayers = 
+        request.maxPlayers = maxPlayers;
+        request.playersToInvite = pendingPlayersToInvite;
+        
+        GKMatchmakerViewController *mmvc = [[[GKMatchmakerViewController alloc] initWithMatchRequest:request] autorelease];
+        mmvc.matchmakerDelegate = self;
+        
+        [presentingViewController presentModalViewController:mmvc animated:YES];
+        
+        self.pendingInvite = nil;
+        self.pendingPlayersToInvite = nil;
+        
+    }
+    
+}
+
+#pragma mark GKMatchmakerViewControllerDelegate
+
+// The user has cancelled matchmaking
+- (void)matchmakerViewControllerWasCancelled:(GKMatchmakerViewController *)viewController {
+    [presentingViewController dismissModalViewControllerAnimated:YES];
+}
+
+// Matchmaking has failed with an error
+- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFailWithError:(NSError *)error {
+    [presentingViewController dismissModalViewControllerAnimated:YES];
+    NSLog(@"Error finding match: %@", error.localizedDescription);
+}
+
+// A peer-to-peer match has been found, the game should start
+- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFindMatch:(GKMatch *)theMatch {
+    [presentingViewController dismissModalViewControllerAnimated:YES];
+    self.match = theMatch;
+    match.delegate = self;
+    if (!matchStarted && match.expectedPlayerCount == 0) {
+        NSLog(@"Ready to start match!");
+        [self lookupPlayers];
+    }
+}
+
+#pragma mark GKMatchDelegate
+
+// The match received data sent from the player.
+- (void)match:(GKMatch *)theMatch didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID {
+    
+    if (match != theMatch) return;
+    
+    [self match:theMatch didReceiveData:data fromPlayer:playerID];
+}
+
+// The player state changed (eg. connected or disconnected)
+- (void)match:(GKMatch *)theMatch player:(NSString *)playerID didChangeState:(GKPlayerConnectionState)state {
+    
+    if (match != theMatch) return;
+    
+    switch (state) {
+        case GKPlayerStateConnected:
+            // handle a new player connection.
+            NSLog(@"Player connected!");
+            
+            if (!matchStarted && theMatch.expectedPlayerCount == 0) {
+                NSLog(@"Ready to start match!");
+                [self lookupPlayers];
+            }
+            
+            break;
+        case GKPlayerStateDisconnected:
+            // a player just disconnected.
+            NSLog(@"Player disconnected!");
+            matchStarted = NO;
+            [self matchEnded];
+            break;
+    }
+    
+}
+
+// The match was unable to connect with the player due to an error.
+- (void)match:(GKMatch *)theMatch connectionWithPlayerFailed:(NSString *)playerID withError:(NSError *)error {
+    
+    if (match != theMatch) return;
+    
+    NSLog(@"Failed to connect to player with error: %@", error.localizedDescription);
+    matchStarted = NO;
+    [self matchEnded];
+}
+
+// The match was unable to be established with any players due to an error.
+- (void)match:(GKMatch *)theMatch didFailWithError:(NSError *)error {
+    
+    if (match != theMatch) return;
+    
+    NSLog(@"Match failed with error: %@", error.localizedDescription);
+    matchStarted = NO;
+    [self matchEnded];
+}
 
 @end
