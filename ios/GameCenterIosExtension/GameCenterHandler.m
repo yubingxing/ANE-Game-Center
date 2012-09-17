@@ -673,9 +673,8 @@
         [presentingViewController dismissModalViewControllerAnimated:NO];
         GKMatchRequest *request = [[[GKMatchRequest alloc] init] autorelease];
         uint32_t tmp = 0;
-        FREGetObjectAsInt32(minPlayers, tmp);
-        request.minPlayers = 
-        request.maxPlayers = maxPlayers;
+        request.minPlayers = FREGetObjectAsInt32(minPlayers, &tmp);
+        request.maxPlayers = FREGetObjectAsInt32(maxPlayers, &tmp);
         request.playersToInvite = pendingPlayersToInvite;
         
         GKMatchmakerViewController *mmvc = [[[GKMatchmakerViewController alloc] initWithMatchRequest:request] autorelease];
@@ -687,7 +686,7 @@
         self.pendingPlayersToInvite = nil;
         
     }
-    
+    return NULL;
 }
 
 #pragma mark GKMatchmakerViewControllerDelegate
@@ -717,13 +716,70 @@
 #pragma mark GKMatchDelegate
 
 // The match received data sent from the player.
-- (void)match:(GKMatch *)theMatch didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID {
+- (void)match:(GKMatch *)theMatch didReceiveData:(NSString *)data fromPlayer:(NSString *)playerID {
     
     if (match != theMatch) return;
     
-    [self match:theMatch didReceiveData:data fromPlayer:playerID];
+    // Store away other player ID for later
+    if (otherPlayerID == nil) {
+        otherPlayerID = [playerID retain];
+    }
+    
+//    Message *message = (Message *) [data bytes];
+//    if (message->messageType == kMessageTypeRandomNumber) {
+//        
+//        MessageRandomNumber * messageInit = (MessageRandomNumber *) [data bytes];
+//        NSLog(@"Received random number: %ud, ours %ud", messageInit->randomNumber, ourRandom);
+//        bool tie = false;
+//        
+//        if (messageInit->randomNumber == ourRandom) {
+//            NSLog(@"TIE!");
+//            tie = true;
+//            ourRandom = arc4random();
+//            [self sendRandomNumber];
+//        } else if (ourRandom > messageInit->randomNumber) {
+//            NSLog(@"We are player 1");
+//            isPlayer1 = YES;
+//        } else {
+//            NSLog(@"We are player 2");
+//            isPlayer1 = NO;
+//        }
+//        
+//        if (!tie) {
+//            receivedRandom = YES;
+//            if (gameState == kGameStateWaitingForRandomNumber) {
+//                [self setGameState:kGameStateWaitingForStart];
+//            }
+//            [self tryStartGame];
+//        }
+//        
+//    } else if (message->messageType == kMessageTypeGameBegin) {
+//        
+//        [self setGameState:kGameStateActive];
+//        [self setupStringsWithOtherPlayerId:playerID];
+//        
+//    } else if (message->messageType == kMessageTypeMove) {
+//        
+//        NSLog(@"Received move");
+//        
+//        if (isPlayer1) {
+//            [player2 moveForward];
+//        } else {
+//            [player1 moveForward];
+//        }
+//    } else if (message->messageType == kMessageTypeGameOver) {
+//        
+//        MessageGameOver * messageGameOver = (MessageGameOver *) [data bytes];
+//        NSLog(@"Received game over with player 1 won: %d", messageGameOver->player1Won);
+//        
+//        if (messageGameOver->player1Won) {
+//            [self endScene:kEndReasonLose];
+//        } else {
+//            [self endScene:kEndReasonWin];
+//        }
+//        
+//    }
 }
-
 // The player state changed (eg. connected or disconnected)
 - (void)match:(GKMatch *)theMatch player:(NSString *)playerID didChangeState:(GKPlayerConnectionState)state {
     
@@ -768,6 +824,28 @@
     NSLog(@"Match failed with error: %@", error.localizedDescription);
     matchStarted = NO;
     [self matchEnded];
+}
+
+- (void)matchStarted {
+    NSLog(@"Match started");
+    if (receivedRandom) {
+//        [self setGameState:kGameStateWaitingForStart];
+    } else {
+//        [self setGameState:kGameStateWaitingForRandomNumber];
+    }
+//    [self sendRandomNumber];
+//    [self tryStartGame];
+}
+
+- (void)inviteReceived {
+//    [self restartTapped:nil];
+}
+
+- (void)matchEnded {
+    NSLog(@"Match ended");
+    [self.match disconnect];
+    self.match = nil;
+//    [self endScene:kEndReasonDisconnect];
 }
 
 @end

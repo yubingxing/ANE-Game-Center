@@ -7,13 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FlashRuntimeExtensions.h"
 #import <GameKit/GameKit.h>
+#import "FlashRuntimeExtensions.h"
+#import "JSONKit.h"
+
 
 @protocol GCHelperDelegate
 - (void)matchStarted;
 - (void)matchEnded;
-- (void)match:(GKMatch *)match didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID;
+//- (void)match:(GKMatch *)match didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID;
 - (void)inviteReceived;
 @end
 
@@ -27,6 +29,10 @@
     NSMutableDictionary *playersDict;
     GKInvite *pendingInvite;
     NSArray *pendingPlayersToInvite;
+    
+    uint32_t ourRandom;
+    BOOL receivedRandom;
+    NSString *otherPlayerID;
     
 }
 
