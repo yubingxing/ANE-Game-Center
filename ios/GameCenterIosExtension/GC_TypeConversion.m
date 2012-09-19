@@ -8,9 +8,9 @@
 
 #import "GC_TypeConversion.h"
 
-#define ASPlayer "com.sticksports.nativeExtensions.gameCenter.GCPlayer"
-#define ASScore "com.sticksports.nativeExtensions.gameCenter.GCScore"
-#define ASAchievement "com.sticksports.nativeExtensions.gameCenter.GCAchievement"
+#define ASPlayer "com.icestar.gameCenter.GCPlayer"
+#define ASScore "com.icestar.gameCenter.GCScore"
+#define ASAchievement "com.icestar.gameCenter.GCAchievement"
 
 @implementation TypeConversion
 

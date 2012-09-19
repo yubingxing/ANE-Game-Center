@@ -132,6 +132,15 @@ package com.icestar.gamecenter
 				case GameCenterEvent.LOAD_ACHIEVEMENTS_FAILED :
 					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_ACHIEVEMENTS_FAILED));
 					break;
+				case GameCenterEvent.MATCH_STARTED:
+					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.MATCH_STARTED));
+					break;
+				case GameCenterEvent.MATCH_ENDED:
+					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.MATCH_ENDED));
+					break;
+				case GameCenterEvent.INVITE_RECEIVED:
+					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.INVITE_RECEIVED));
+					break;
 			}
 		}
 		

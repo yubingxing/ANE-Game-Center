@@ -17,10 +17,10 @@
 
 #define DISPATCH_STATUS_EVENT(extensionContext, code, status) FREDispatchStatusEventAsync((extensionContext), (uint8_t*)code, (uint8_t*)status)
 
-#define ASLocalPlayer "com.sticksports.nativeExtensions.gameCenter.GCLocalPlayer"
-#define ASLeaderboard "com.sticksports.nativeExtensions.gameCenter.GCLeaderboard"
-#define ASVectorScore "Vector.<com.sticksports.nativeExtensions.gameCenter.GCScore>"
-#define ASVectorAchievement "Vector.<com.sticksports.nativeExtensions.gameCenter.GCAchievement>"
+#define ASLocalPlayer "com.icestar.gameCenter.GCLocalPlayer"
+#define ASLeaderboard "com.icestar.gameCenter.GCLeaderboard"
+#define ASVectorScore "Vector.<com.icestar.gameCenter.GCScore>"
+#define ASVectorAchievement "Vector.<com.icestar.gameCenter.GCAchievement>"
 
 @interface GameCenterHandler () {
 }
@@ -74,7 +74,7 @@
     NSString* key;
     do
     {
-        key = [NSString stringWithFormat: @"%i", random()];
+        key = [NSString stringWithFormat: @"%ld", random()];
     } while ( [self.returnObjects valueForKey:key] != nil );
     [self.returnObjects setValue:object forKey:key];
     return key;
@@ -716,7 +716,7 @@
 #pragma mark GKMatchDelegate
 
 // The match received data sent from the player.
-- (void)match:(GKMatch *)theMatch didReceiveData:(NSString *)data fromPlayer:(NSString *)playerID {
+- (void)match:(GKMatch *)theMatch didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID {
     
     if (match != theMatch) return;
     
@@ -780,6 +780,7 @@
 //        
 //    }
 }
+
 // The player state changed (eg. connected or disconnected)
 - (void)match:(GKMatch *)theMatch player:(NSString *)playerID didChangeState:(GKPlayerConnectionState)state {
     
@@ -835,17 +836,39 @@
     }
 //    [self sendRandomNumber];
 //    [self tryStartGame];
+    DISPATCH_STATUS_EVENT(self.context, "", MatchStarted);
 }
 
 - (void)inviteReceived {
 //    [self restartTapped:nil];
+    DISPATCH_STATUS_EVENT(self.context, "", InviteReceived);
 }
 
 - (void)matchEnded {
     NSLog(@"Match ended");
     [self.match disconnect];
     self.match = nil;
+    DISPATCH_STATUS_EVENT(self.context, "", MatchEnded);
 //    [self endScene:kEndReasonDisconnect];
 }
 
+- (FREObject)sendData:(FREObject)msg {
+    NSError *error;
+    uint8_t *tmp = NULL;
+    NSString *str = FREGetObjectAsUTF8(msg, 0, tmp);
+    NSData *data = [str JSONData];
+
+//    if([data isKindOfClass:[NSArray class]]){
+//        str = [(NSArray *)data JSONString];
+//    } else if ([data isKindOfClass:[NSDictionary class]]) {
+//        str = [(NSDictionary *)data JSONString];
+//    } else if ([data isKindOfClass:[NSString class]]) {
+//        str = [(NSString *)data JSONString];
+//    }
+    BOOL success = [self.match sendDataToAllPlayers:data withDataMode:GKMatchSendDataReliable error:&error];
+    if (!success) {
+        NSLog(@"Error sending init packet");
+        [self matchEnded];
+    }
+}
 @end

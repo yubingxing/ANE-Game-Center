@@ -25,5 +25,8 @@
 #define loadLeaderboardFailed "LoadLeaderboardFailed"
 #define loadAchievementsComplete "LoadAchievementsComplete"
 #define loadAchievementsFailed "LoadAchievementsFailed"
+#define MatchStarted "MatchStarted"
+#define MatchEnded "MatchEnded"
+#define InviteReceived "InviteReceived"
 
 #endif

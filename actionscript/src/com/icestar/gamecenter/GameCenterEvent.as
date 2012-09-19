@@ -18,6 +18,9 @@ package com.icestar.gamecenter
 		public static const LOAD_LEADERBOARD_FAILED:String = "LoadLeaderboardFailed";
 		public static const LOAD_ACHIEVEMENTS_COMPLETE:String = "LoadAchievementsComplete";
 		public static const LOAD_ACHIEVEMENTS_FAILED:String = "LoadAchievementsFailed";
+		public static const MATCH_STARTED:String = "MatchStarted";
+		public static const MATCH_ENDED:String = "MatchEnded";
+		public static const INVITE_RECEIVED:String = "InviteReceived";
 		
 		public function GameCenterEvent(type:String, data:*=null, bubbles:Boolean=false, cancelable:Boolean=false) {
 			this._data = data;

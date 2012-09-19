@@ -65,5 +65,6 @@
 - (FREObject) getStoredLeaderboard:(FREObject)asKey;
 - (FREObject) getStoredAchievements:(FREObject)asKey;
 - (FREObject) getStoredPlayers:(FREObject)asKey;
+- (FREObject) sendData:(FREObject)msg;
 
 @end
