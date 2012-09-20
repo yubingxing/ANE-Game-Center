@@ -16,4 +16,5 @@
 -(void) displayLeaderboardWithCategory:(NSString*)category andTimescope:(int)timeScope;
 -(void) displayLeaderboardWithTimescope:(int)timeScope;
 -(void) displayAchievements;
+-(void) displayMatchMaker:(uint32_t)min max:(uint32_t)max;
 @end

@@ -219,8 +219,8 @@
 
 @implementation GKPlayer(JSONKitSerializing)
 
-- (NSString *)JSONString {
-    return [[[NSString alloc] autorelease] initWithFormat:@"{\"id\":\"%@\",\"alias\":\"%@\"}", self.playerID, self.alias];
+- (uint8_t *)JSONString {
+    return (uint8_t *)[[[[NSString alloc] autorelease] initWithFormat:@"{\"id\":\"%@\",\"alias\":\"%@\"}", self.playerID, self.alias] UTF8String];
 }
 
 @end

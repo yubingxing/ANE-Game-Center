@@ -11,7 +11,7 @@
 #import "FlashRuntimeExtensions.h"
 
 @interface GKPlayer (JSONKitSerializing)
-- (NSString *)JSONString;
+- (uint8_t *)JSONString;
 @end
 @interface TypeConversion : NSObject
 

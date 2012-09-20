@@ -9,9 +9,10 @@
 #import <UIKit/UIKit.h>
 #import <GameKit/GameKit.h>
 #import "FlashRuntimeExtensions.h"
+#import "GameCenterHandler.h"
 #import "GC_BoardsController.h"
 
-@interface BoardsControllerPad : NSObject <BoardsController,GKLeaderboardViewControllerDelegate,GKAchievementViewControllerDelegate>
+@interface BoardsControllerPad : NSObject <BoardsController,GKLeaderboardViewControllerDelegate,GKAchievementViewControllerDelegate,GKMatchmakerViewControllerDelegate>
 {
     
 }
@@ -21,4 +22,5 @@
 -(void) displayLeaderboardWithCategory:(NSString*)category andTimescope:(int)timeScope;
 -(void) displayLeaderboardWithTimescope:(int)timeScope;
 -(void) displayAchievements;
+-(void) displayMatchMaker:(uint32_t)min max:(uint32_t)max;
 @end

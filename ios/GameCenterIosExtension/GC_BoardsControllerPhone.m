@@ -36,14 +36,14 @@
 {
     [self dismissModalViewControllerAnimated:YES];
     [self.view.superview removeFromSuperview];
-    FREDispatchStatusEventAsync(context, "", gameCenterViewRemoved);
+    FREDispatchStatusEventAsync(context, (const uint8_t*)"", gameCenterViewRemoved);
 }
 
 - (void)achievementViewControllerDidFinish:(GKLeaderboardViewController *)viewController
 {
     [self dismissModalViewControllerAnimated:YES];
     [self.view.superview removeFromSuperview];
-    FREDispatchStatusEventAsync(context, "", gameCenterViewRemoved);
+    FREDispatchStatusEventAsync(context, (const uint8_t*)"", gameCenterViewRemoved);
 }
 
 -(void) displayLeaderboard
@@ -102,6 +102,57 @@
         achievementController.achievementDelegate = self;
         [win addSubview:self.view];
         [self presentModalViewController: achievementController animated: YES];
+    }
+}
+
+-(void) displayMatchMaker:(uint32_t)min max:(uint32_t)max
+{
+    GameCenterHandler *gc = [GameCenterHandler sharedInstance];
+    [[self presentingViewController] dismissModalViewControllerAnimated:NO];
+    GKMatchmakerViewController *mmvc = nil;
+    if (gc.pendingInvite != nil) {
+        mmvc = [[[GKMatchmakerViewController alloc] initWithInvite:gc.pendingInvite] autorelease];
+    } else {
+        GKMatchRequest *request = [[[GKMatchRequest alloc] init] autorelease];
+        request.minPlayers = min;
+        request.maxPlayers = max;
+        request.playersToInvite = gc.pendingPlayersToInvite;
+        mmvc = [[[GKMatchmakerViewController alloc] initWithMatchRequest:request] autorelease];
+    }
+    
+    mmvc.matchmakerDelegate = self;
+    [win addSubview:self.view];
+    [self presentModalViewController:mmvc animated:YES];
+    gc.pendingInvite = nil;
+    gc.pendingPlayersToInvite = nil;
+}
+
+
+#pragma mark GKMatchmakerViewControllerDelegate
+
+// The user has cancelled matchmaking
+- (void)matchmakerViewControllerWasCancelled:(GKMatchmakerViewController *)viewController {
+    [[self presentingViewController] dismissModalViewControllerAnimated:YES];
+    [self dismissModalViewControllerAnimated:YES];
+    [self.view.superview removeFromSuperview];
+    FREDispatchStatusEventAsync(context, (const uint8_t*)"", gameCenterViewRemoved);
+}
+
+// Matchmaking has failed with an error
+- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFailWithError:(NSError *)error {
+    [[self presentingViewController] dismissModalViewControllerAnimated:YES];
+    NSLog(@"Error finding match: %@", error.localizedDescription);
+}
+
+// A peer-to-peer match has been found, the game should start
+- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFindMatch:(GKMatch *)theMatch {
+    [[self presentingViewController] dismissModalViewControllerAnimated:YES];
+    GameCenterHandler *gc = [GameCenterHandler sharedInstance];
+    gc.match = theMatch;
+    theMatch.delegate = gc;
+    if (!gc.isMatchStarted && theMatch.expectedPlayerCount == 0) {
+        NSLog(@"Ready to start match!");
+        [gc lookupPlayers];
     }
 }
 

@@ -35,16 +35,21 @@
 
 @synthesize context, returnObjects, boardsController, converter;
 @synthesize gameCenterAvailable;
-@synthesize presentingViewController;
+@synthesize isMatchStarted;
 @synthesize match;
 @synthesize playersDict;
 @synthesize pendingInvite;
 @synthesize pendingPlayersToInvite;
 
+static GameCenterHandler *_sharedHelper = nil;
++ (GameCenterHandler *) sharedInstance {
+    return _sharedHelper;
+}
 
 - (id)initWithContext:(FREContext)extensionContext
 {
     self = [super init];
+    _sharedHelper = self;
     if( self )
     {
         context = extensionContext;
@@ -104,7 +109,7 @@
     {
         return result;
     }
-    return NULL;
+    return nil;
 }
 
 - (FREObject) authenticateLocalPlayer
@@ -152,7 +157,7 @@
     }
     else
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
     }
     return NULL;
 }
@@ -168,7 +173,7 @@
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -180,11 +185,11 @@
          {
              if( error == nil )
              {
-                 DISPATCH_STATUS_EVENT( self.context, "", scoreReported );
+                 DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", scoreReported );
              }
              else
              {
-                 DISPATCH_STATUS_EVENT( self.context, "", scoreNotReported );
+                 DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", scoreNotReported );
              }
          }];
     }
@@ -235,7 +240,7 @@
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -285,14 +290,14 @@
                   else
                   {
                       [leaderboardWithNames release];
-                      DISPATCH_STATUS_EVENT( self.context, "", loadLeaderboardFailed );
+                      DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadLeaderboardFailed );
                   }
               }];
          }
          else
          {
              [leaderboard release];
-             DISPATCH_STATUS_EVENT( self.context, "", loadLeaderboardFailed );
+             DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadLeaderboardFailed );
          }
      }];
     return NULL;
@@ -312,7 +317,7 @@
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -328,11 +333,11 @@
          {
              if( error == nil )
              {
-                 DISPATCH_STATUS_EVENT( self.context, "", achievementReported );
+                 DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", achievementReported );
              }
              else
              {
-                 DISPATCH_STATUS_EVENT( self.context, "", achievementNotReported );
+                 DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", achievementNotReported );
              }
          }];
     }
@@ -352,7 +357,7 @@
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -366,7 +371,7 @@
          }
          else
          {
-             DISPATCH_STATUS_EVENT( self.context, "", loadAchievementsFailed );
+             DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadAchievementsFailed );
          }
      }];
     return NULL;
@@ -377,7 +382,7 @@
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     [localPlayer loadFriendsWithCompletionHandler:^(NSArray *friendIds, NSError *error)
@@ -402,14 +407,14 @@
                       }
                       else
                       {
-                          DISPATCH_STATUS_EVENT( self.context, "", loadFriendsFailed );
+                          DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadFriendsFailed );
                       }
                   }];
              }
          }
          else
          {
-             DISPATCH_STATUS_EVENT( self.context, "", loadFriendsFailed );
+             DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadFriendsFailed );
          }
      }];
     return NULL;
@@ -420,7 +425,7 @@
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -449,7 +454,7 @@
          else
          {
              [leaderboard release];
-             DISPATCH_STATUS_EVENT( self.context, "", loadLocalPlayerScoreFailed );
+             DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadLocalPlayerScoreFailed );
          }
      }];
     return NULL;
@@ -460,7 +465,7 @@
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -499,7 +504,7 @@
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, "", notAuthenticated );
+        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -629,7 +634,7 @@
         
         if (error != nil) {
             NSLog(@"Error retrieving player info: %@", error.localizedDescription);
-            matchStarted = NO;
+            isMatchStarted = NO;
             [self matchEnded];
         } else {
             
@@ -641,7 +646,7 @@
             }
             
             // Notify delegate match can begin
-            matchStarted = YES;
+            isMatchStarted = YES;
             [self matchStarted];
             
         }
@@ -649,68 +654,22 @@
     
 }
 
-- (FREObject)findMatchWithMinPlayers:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers {
+
+- (FREObject)showMatchMaker:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers {
     
     if (!gameCenterAvailable) return NULL;
     
-    matchStarted = NO;
+    isMatchStarted = NO;
     self.match = nil;
-    self.presentingViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
-
     
-    if (pendingInvite != nil) {
-        
-        [presentingViewController dismissModalViewControllerAnimated:NO];
-        GKMatchmakerViewController *mmvc = [[[GKMatchmakerViewController alloc] initWithInvite:pendingInvite] autorelease];
-        mmvc.matchmakerDelegate = self;
-        [presentingViewController presentModalViewController:mmvc animated:YES];
-        
-        self.pendingInvite = nil;
-        self.pendingPlayersToInvite = nil;
-        
-    } else {
-        
-        [presentingViewController dismissModalViewControllerAnimated:NO];
-        GKMatchRequest *request = [[[GKMatchRequest alloc] init] autorelease];
-        uint32_t tmp = 0;
-        request.minPlayers = FREGetObjectAsInt32(minPlayers, &tmp);
-        request.maxPlayers = FREGetObjectAsInt32(maxPlayers, &tmp);
-        request.playersToInvite = pendingPlayersToInvite;
-        
-        GKMatchmakerViewController *mmvc = [[[GKMatchmakerViewController alloc] initWithMatchRequest:request] autorelease];
-        mmvc.matchmakerDelegate = self;
-        
-        [presentingViewController presentModalViewController:mmvc animated:YES];
-        
-        self.pendingInvite = nil;
-        self.pendingPlayersToInvite = nil;
-        
-    }
-    return NULL;
-}
-
-#pragma mark GKMatchmakerViewControllerDelegate
-
-// The user has cancelled matchmaking
-- (void)matchmakerViewControllerWasCancelled:(GKMatchmakerViewController *)viewController {
-    [presentingViewController dismissModalViewControllerAnimated:YES];
-}
-
-// Matchmaking has failed with an error
-- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFailWithError:(NSError *)error {
-    [presentingViewController dismissModalViewControllerAnimated:YES];
-    NSLog(@"Error finding match: %@", error.localizedDescription);
-}
-
-// A peer-to-peer match has been found, the game should start
-- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFindMatch:(GKMatch *)theMatch {
-    [presentingViewController dismissModalViewControllerAnimated:YES];
-    self.match = theMatch;
-    match.delegate = self;
-    if (!matchStarted && match.expectedPlayerCount == 0) {
-        NSLog(@"Ready to start match!");
-        [self lookupPlayers];
-    }
+    [self createBoardsController];
+    uint32_t min = 0;
+    uint32_t max = 0;
+    FREGetObjectAsInt32(minPlayers, &min);
+    FREGetObjectAsInt32(maxPlayers, &max);
+    [self.boardsController displayMatchMaker:min max:max];
+  
+    return nil;
 }
 
 #pragma mark GKMatchDelegate
@@ -791,7 +750,7 @@
             // handle a new player connection.
             NSLog(@"Player connected!");
             
-            if (!matchStarted && theMatch.expectedPlayerCount == 0) {
+            if (!isMatchStarted && theMatch.expectedPlayerCount == 0) {
                 NSLog(@"Ready to start match!");
                 [self lookupPlayers];
             }
@@ -800,7 +759,7 @@
         case GKPlayerStateDisconnected:
             // a player just disconnected.
             NSLog(@"Player disconnected!");
-            matchStarted = NO;
+            isMatchStarted = NO;
             [self matchEnded];
             break;
     }
@@ -813,7 +772,7 @@
     if (match != theMatch) return;
     
     NSLog(@"Failed to connect to player with error: %@", error.localizedDescription);
-    matchStarted = NO;
+    isMatchStarted = NO;
     [self matchEnded];
 }
 
@@ -823,7 +782,7 @@
     if (match != theMatch) return;
     
     NSLog(@"Match failed with error: %@", error.localizedDescription);
-    matchStarted = NO;
+    isMatchStarted = NO;
     [self matchEnded];
 }
 
@@ -836,27 +795,28 @@
     }
 //    [self sendRandomNumber];
 //    [self tryStartGame];
-    DISPATCH_STATUS_EVENT(self.context, "", MatchStarted);
+    DISPATCH_STATUS_EVENT(self.context, (const uint8_t *)"", MatchStarted);
 }
 
 - (void)inviteReceived {
 //    [self restartTapped:nil];
-    DISPATCH_STATUS_EVENT(self.context, "", InviteReceived);
+    DISPATCH_STATUS_EVENT(self.context, (const uint8_t *)"", InviteReceived);
 }
 
 - (void)matchEnded {
     NSLog(@"Match ended");
     [self.match disconnect];
     self.match = nil;
-    DISPATCH_STATUS_EVENT(self.context, "", MatchEnded);
+    DISPATCH_STATUS_EVENT(self.context, (const uint8_t *)"", MatchEnded);
 //    [self endScene:kEndReasonDisconnect];
 }
 
 - (FREObject)sendData:(FREObject)msg {
     NSError *error;
-    uint8_t *tmp = NULL;
-    NSString *str = FREGetObjectAsUTF8(msg, 0, tmp);
-    NSData *data = [str JSONData];
+    NSString *tmp = nil;
+
+    GC_FREGetObjectAsString(msg, &tmp);
+    NSData *data = [tmp JSONData];
 
 //    if([data isKindOfClass:[NSArray class]]){
 //        str = [(NSArray *)data JSONString];
@@ -870,5 +830,28 @@
         NSLog(@"Error sending init packet");
         [self matchEnded];
     }
+    return nil;
 }
+
+FREObject alert(FREContext ctx,void* funcData, uint32_t argc, FREObject argv[]){
+    //先定义两个变量，用来寄存标题和内容。
+    const uint8_t* title = nil;
+    const uint8_t* msg = nil;
+    uint32_t len = -1;
+    
+    //使用FREGetObjectAsUTF8，从argv中取出相应的参数值，然后存放到title和msg对应的指针中。
+    //这是通过FRE API实现从FREObject中向Native变量赋值的典型形式。
+    FREGetObjectAsUTF8(argv[0], &len, &title);
+    FREGetObjectAsUTF8(argv[1], &len, &msg);
+    
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithUTF8String:(const char *)title]
+                                                    message:[NSString stringWithUTF8String:(const char *)msg] delegate:nil
+                                          cancelButtonTitle:@"Cancel"
+                                          otherButtonTitles:nil,nil];
+    [alert show];
+    
+    return nil;
+}
+
 @end
