@@ -115,7 +115,7 @@
         if ( localPlayer.isAuthenticated )
         {
             userAuthenticated = YES;
-            DISPATCH_STATUS_EVENT( self.context, "", localPlayerAuthenticated );
+            DISPATCH_STATUS_EVENT( self.context, [localPlayer JSONString], localPlayerAuthenticated );
             return NULL;
         }
         else
@@ -124,12 +124,12 @@
                 if( localPlayer.isAuthenticated )
                 {
                     userAuthenticated = YES;
-                    DISPATCH_STATUS_EVENT( self.context, "", localPlayerAuthenticated );
+                    DISPATCH_STATUS_EVENT( self.context, [localPlayer JSONString], localPlayerAuthenticated );
                 }
                 else
                 {
                     userAuthenticated = NO;
-                    DISPATCH_STATUS_EVENT( self.context, "", localPlayerNotAuthenticated );
+                    DISPATCH_STATUS_EVENT( self.context, [localPlayer JSONString], localPlayerNotAuthenticated );
                 }
             }];
         }
@@ -336,7 +336,7 @@
              }
          }];
     }
-    return NULL;
+    return nil;
 }
 
 

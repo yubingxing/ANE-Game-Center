@@ -216,3 +216,11 @@
 }
 
 @end
+
+@implementation GKPlayer(JSONKitSerializing)
+
+- (NSString *)JSONString {
+    return [[[NSString alloc] autorelease] initWithFormat:@"{\"id\":\"%@\",\"alias\":\"%@\"}", self.playerID, self.alias];
+}
+
+@end

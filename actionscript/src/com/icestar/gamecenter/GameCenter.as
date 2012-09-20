@@ -5,7 +5,7 @@ package com.icestar.gamecenter
 	import flash.external.ExtensionContext;
 	
 	final public class GameCenter {
-		public static const EXTENSION_ID:String = "com.icestar.gamecenter";
+		public static const EXTENSION_ID:String = "com.icestar.GameCenter";
 		
 		private static const dispatcher:EventDispatcher = new EventDispatcher;
 		

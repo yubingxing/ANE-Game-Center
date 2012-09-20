@@ -10,6 +10,9 @@
 #import <GameKit/GameKit.h>
 #import "FlashRuntimeExtensions.h"
 
+@interface GKPlayer (JSONKitSerializing)
+- (NSString *)JSONString;
+@end
 @interface TypeConversion : NSObject
 
 - (FREResult) FREGetObject:(FREObject)object asString:(NSString**)value;

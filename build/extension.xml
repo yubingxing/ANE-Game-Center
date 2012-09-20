@@ -1,6 +1,6 @@
 <extension xmlns="http://ns.adobe.com/air/extension/3.1">
-	<id>com.sticksports.nativeExtensions.GameCenter</id>
-	<versionNumber>0.7.0</versionNumber>
+	<id>com.icestar.GameCenter</id>
+	<versionNumber>0.1.0</versionNumber>
 	<platforms>
 		<platform name="iPhone-ARM">
 			<applicationDeployment>
