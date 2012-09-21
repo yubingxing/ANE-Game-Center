@@ -13,18 +13,18 @@
 #import "JSONKit.h"
 
 
-@protocol GCHelperDelegate
+@protocol GameCenterDelegate
 - (void)matchStarted;
 - (void)matchEnded;
-//- (void)match:(GKMatch *)match didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID;
 - (void)inviteReceived;
 @end
 
-@interface GameCenterHandler : NSObject <GKMatchDelegate> {
+@interface GameCenterHandler : NSObject <GKMatchDelegate,GKSessionDelegate,GKPeerPickerControllerDelegate,GameCenterDelegate> {
     BOOL gameCenterAvailable;
     BOOL userAuthenticated;
     
     GKMatch *match;
+    GKSession *gameSession;
     BOOL isMatchStarted;
     NSMutableDictionary *playersDict;
     GKInvite *pendingInvite;
@@ -39,6 +39,7 @@
 @property (assign, readonly) BOOL gameCenterAvailable;
 @property (assign, readonly) BOOL isMatchStarted;
 @property (retain) GKMatch *match;
+@property (retain) GKSession *gameSession;
 @property (retain) NSMutableDictionary *playersDict;
 @property (retain) GKInvite *pendingInvite;
 @property (retain) NSArray *pendingPlayersToInvite;
@@ -68,6 +69,10 @@
 - (FREObject) getStoredLeaderboard:(FREObject)asKey;
 - (FREObject) getStoredAchievements:(FREObject)asKey;
 - (FREObject) getStoredPlayers:(FREObject)asKey;
+// Add p2p connection func
 - (FREObject) sendData:(FREObject)msg;
-
+- (FREObject) requestPeerMatch:(FREObject)name;
+- (FREObject) joinServer:(FREObject)peerId;
+- (FREObject) acceptPeer:(FREContext)peerId;
+- (FREObject) denyPeer:(FREContext)peerId;
 @end

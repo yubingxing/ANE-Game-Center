@@ -23,6 +23,7 @@
 #define ASVectorAchievement "Vector.<com.icestar.gameCenter.GCAchievement>"
 
 @interface GameCenterHandler () {
+    GKPeerPickerController *picker;
 }
 @property FREContext context;
 @property (retain)NSMutableDictionary* returnObjects;
@@ -37,6 +38,7 @@
 @synthesize gameCenterAvailable;
 @synthesize isMatchStarted;
 @synthesize match;
+@synthesize gameSession;
 @synthesize playersDict;
 @synthesize pendingInvite;
 @synthesize pendingPlayersToInvite;
@@ -786,6 +788,7 @@ static GameCenterHandler *_sharedHelper = nil;
     [self matchEnded];
 }
 
+#pragma mark GameCenterDelegate
 - (void)matchStarted {
     NSLog(@"Match started");
     if (receivedRandom) {
@@ -852,6 +855,143 @@ FREObject alert(FREContext ctx,void* funcData, uint32_t argc, FREObject argv[]){
     [alert show];
     
     return nil;
+}
+
+// Add local net p2p connect
+- (FREObject) requestPeerMatch:(FREObject)name {
+    NSString *myName = nil;
+
+    GC_FREGetObjectAsString(name, &myName);
+    
+    GKSession* session = [[GKSession alloc] initWithSessionID:nil
+                                                  displayName:myName
+                                                  sessionMode: GKSessionModePeer ];
+    self.gameSession = session;
+    
+    [session setDataReceiveHandler:self withContext:nil];
+    session.delegate = self;
+    session.available = YES;
+    
+    FREObject reVal;
+    FRENewObjectFromUTF8((uint32_t)[session.peerID length], (const uint8_t*)[session.peerID UTF8String], &reVal);
+    return reVal;
+}
+
+- (FREObject) joinServer:(FREObject)peerId {
+    NSString *peerID = nil;
+    GC_FREGetObjectAsString(peerId, &peerID);
+    
+    uint32_t timeInterval = 10000;
+    
+    [self.gameSession connectToPeer:peerID withTimeout:timeInterval];
+    return nil;
+}
+
+- (FREObject) acceptPeer:(FREContext)peerId {
+    NSString *peerID = nil;
+    GC_FREGetObjectAsString(peerId, &peerID);
+    
+    [self.gameSession acceptConnectionFromPeer:peerID error:nil];
+    
+    return nil;
+}
+
+- (FREObject) denyPeer:(FREContext)peerId {
+    NSString *peerID = nil;
+    GC_FREGetObjectAsString(peerId, &peerID);
+
+    [self.gameSession denyConnectionFromPeer:peerID];
+    return nil;
+}
+
+- (FREObject) showPeerPicker {
+    if(picker)[picker dismiss];
+    picker = [[[GKPeerPickerController alloc] init] autorelease];
+    picker.delegate = self;
+    [picker show];
+    return nil;
+}
+
+
+#pragma mark GKSessionDelegate
+
+/* Indicates a state change for the given peer.
+ */
+- (void)session:(GKSession *)session peer:(NSString *)peerID didChangeState:(GKPeerConnectionState)state {
+    NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"{"];
+    [retXML appendFormat:@"\"peerId\":\"%@\"", peerID];
+    [retXML appendFormat:@",\"name\":\"%@\"", [session displayNameForPeer:peerID]];
+    
+    switch (state)
+    {
+        case GKPeerStateAvailable:
+            [retXML appendFormat:@",\"available\":1"];
+            break;
+        default:
+            break;
+    }
+    [retXML appendFormat:@"}"];
+    DISPATCH_STATUS_EVENT(context, (const uint8_t*)[retXML UTF8String], playerStatusChanged);
+
+}
+
+/* Indicates a connection request was received from another peer.
+ 
+ Accept by calling -acceptConnectionFromPeer:
+ Deny by calling -denyConnectionFromPeer:
+ */
+- (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID {
+    NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"{"];
+    [retXML appendFormat:@"\"peerId\":\"%@\"", peerID];
+    [retXML appendFormat:@",\"name\":\"%@\"", [session displayNameForPeer:peerID]];
+    [retXML appendFormat:@"}"];
+    DISPATCH_STATUS_EVENT(context, (const uint8_t*)[retXML UTF8String], receivedClientRequest);
+}
+
+/* Indicates a connection error occurred with a peer, which includes connection request failures, or disconnects due to timeouts.
+ */
+- (void)session:(GKSession *)session connectionWithPeerFailed:(NSString *)peerID withError:(NSError *)error {
+    
+}
+
+/* Indicates an error occurred with the session such as failing to make available.
+ */
+- (void)session:(GKSession *)session didFailWithError:(NSError *)error {
+    
+}
+
+#pragma mark GKPeerPickerControllerDelegate
+
+/* Notifies delegate that a connection type was chosen by the user.
+ */
+- (void)peerPickerController:(GKPeerPickerController *)picker didSelectConnectionType:(GKPeerPickerConnectionType)type {
+    
+}
+
+/* Notifies delegate that the connection type is requesting a GKSession object.
+ 
+ You should return a valid GKSession object for use by the picker. If this method is not implemented or returns 'nil', a default GKSession is created on the delegate's behalf.
+ */
+- (GKSession *)peerPickerController:(GKPeerPickerController *)picker sessionForConnectionType:(GKPeerPickerConnectionType)type {
+    return nil;
+}
+
+/* Notifies delegate that the peer was connected to a GKSession.
+ */
+- (void)peerPickerController:(GKPeerPickerController *)picker didConnectPeer:(NSString *)peerID toSession:(GKSession *)session {
+    
+}
+
+/* Notifies delegate that the user cancelled the picker.
+ */
+- (void)peerPickerControllerDidCancel:(GKPeerPickerController *)picker {
+    
+}
+
+- (void) receiveData:(NSData *)data fromPeer:(NSString *)peer inSession: (GKSession *)session context:(void *)context
+{
+//    NSLog([NSString stringWithUTF8String:(const char*)[data bytes]]);
+//    handleReceivedData(data);
 }
 
 @end

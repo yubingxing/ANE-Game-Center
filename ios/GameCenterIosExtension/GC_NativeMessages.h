@@ -25,8 +25,12 @@
 #define loadLeaderboardFailed "LoadLeaderboardFailed"
 #define loadAchievementsComplete "LoadAchievementsComplete"
 #define loadAchievementsFailed "LoadAchievementsFailed"
+//==============add match func======================
 #define MatchStarted "MatchStarted"
 #define MatchEnded "MatchEnded"
 #define InviteReceived "InviteReceived"
+//==============add local p2p connection================
+#define playerStatusChanged "playerStatusChanged"
+#define receivedClientRequest "receivedClientRequest"
 
 #endif
