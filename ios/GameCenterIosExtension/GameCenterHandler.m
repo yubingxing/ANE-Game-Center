@@ -857,7 +857,7 @@ FREObject alert(FREContext ctx,void* funcData, uint32_t argc, FREObject argv[]){
     return nil;
 }
 
-// Add local net p2p connect
+#pragma mark Add local net p2p connect
 - (FREObject) requestPeerMatch:(FREObject)name {
     NSString *myName = nil;
 

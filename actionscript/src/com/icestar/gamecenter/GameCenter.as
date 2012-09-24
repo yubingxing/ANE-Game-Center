@@ -329,6 +329,29 @@ package com.icestar.gamecenter
 			return extensionContext.call( NativeMethods.getStoredPlayers, key ) as Array;
 		}
 		
+		public static function showMatchMaker(minPlayers:int, maxPlayers.int):void {
+			return extensionContext.call( NativeMethods.showMatchMaker, minPlayers, maxPlayers);
+		}
+		
+		public static function sendData(data:String):void {
+			return extensionContext.call( NativeMethods.sendData, data);
+		}
+		
+		public static function requestPeerMatch(name:String):void {
+			return extensionContext.call( NativeMethods.requestPeerMatch, name);
+		}
+		
+		public static function joinServer(peerId:String):void {
+			return extensionContext.call( NativeMethods.joinServer, peerId);
+		}
+		
+		public static function acceptPeer(peerId:String):void {
+			return extensionContext.call( NativeMethods.acceptPeer, peerId);
+		}
+		
+		public static function denyPeer(peerId:String):void {
+			return extensionContext.call( NativeMethods.denyPeer, peerId);
+		}
 		/**
 		 * Clean up the extension - only if you no longer need it or want to free memory. All listeners will be removed.
 		 */

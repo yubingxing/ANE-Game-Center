@@ -20,5 +20,13 @@ package com.icestar.gamecenter
 		internal static const getStoredPlayers : String = "GC_getStoredPlayers";
 		internal static const getAchievements : String = "GC_getAchievements";
 		internal static const getStoredAchievements : String = "GC_getStoredAchievements";
+		// add gamecenter match func
+		internal static const showMatchMaker : String = "GC_showMatchMaker";
+		internal static const sendData : String = "GC_sendData";
+		// add local p2p func
+		internal static const requestPeerMatch : String = "GC_requestPeerMatch";
+		internal static const joinServer : String = "GC_joinServer";
+		internal static const acceptPeer : String = "GC_acceptPeer";
+		internal static const denyPeer : String = "GC_denyPeer";
 	}
 }
