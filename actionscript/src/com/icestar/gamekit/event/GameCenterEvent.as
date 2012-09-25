@@ -1,4 +1,4 @@
-package com.icestar.gamecenter.event
+package com.icestar.gamekit.event
 {
 	import flash.events.Event;
 	
@@ -18,15 +18,6 @@ package com.icestar.gamecenter.event
 		public static const LOAD_LEADERBOARD_FAILED:String = "LoadLeaderboardFailed";
 		public static const LOAD_ACHIEVEMENTS_COMPLETE:String = "LoadAchievementsComplete";
 		public static const LOAD_ACHIEVEMENTS_FAILED:String = "LoadAchievementsFailed";
-		//==============add gamecenter match func======================
-		public static const MATCH_STARTED:String = "MatchStarted";
-		public static const MATCH_ENDED:String = "MatchEnded";
-		public static const INVITE_RECEIVED:String = "InviteReceived";
-		//==============add local p2p connection================
-		public static const PLAYER_STATUS_CHANGE:String = "playerStatusChanged";
-		public static const RECEIVED_CLIENT_REQUEST:String = "receivedClientRequest";
-		//==============received data==================
-		public static const RECEIVED_DATA:String = "receivedData";
 		
 		public function GameCenterEvent(type:String, data:*=null, bubbles:Boolean=false, cancelable:Boolean=false) {
 			this._data = data;

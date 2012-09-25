@@ -1,12 +1,12 @@
 <extension xmlns="http://ns.adobe.com/air/extension/3.1">
-	<id>com.icestar.GameCenter</id>
+	<id>com.icestar.GameKit</id>
 	<versionNumber>0.1.0</versionNumber>
 	<platforms>
 		<platform name="iPhone-ARM">
 			<applicationDeployment>
-				<nativeLibrary>libGameCenterIosExtension.a</nativeLibrary>
-				<initializer>GameCenterExtensionInitializer</initializer>
-				<finalizer>GameCenterExtensionFinalizer</finalizer>
+				<nativeLibrary>libGameKitIosExtension.a</nativeLibrary>
+				<initializer>GameKitExtensionInitializer</initializer>
+				<finalizer>GameKitExtensionFinalizer</finalizer>
 			</applicationDeployment>
 		</platform>
 		<platform name="default">

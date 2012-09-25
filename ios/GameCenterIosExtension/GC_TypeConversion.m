@@ -12,6 +12,31 @@
 #define ASScore "com.icestar.gameCenter.GCScore"
 #define ASAchievement "com.icestar.gameCenter.GCAchievement"
 
+const uint8_t * getPlayerString (NSString *pid, NSString *alias, BOOL available) {
+    NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"{"];
+    [retXML appendFormat:@"\"id\":\"%@\",\"alias\":\"%@\"", pid, alias];
+    if(available)
+        [retXML appendFormat:@",\"available\":1"];
+    [retXML appendFormat:@"}"];
+    return (const uint8_t *)[retXML UTF8String];
+}
+
+const uint8_t * getPlayersString (NSArray *players) {
+    NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"["];
+    for (GKPlayer *player in players) {
+        [retXML appendFormat:@"{\"id\":\"%@\",\"alias\":\"%@\"},", player.playerID, player.alias];
+    }
+    return (const uint8_t *)[[[retXML substringToIndex:retXML.length-1] stringByAppendingString:@"]"] UTF8String];
+}
+
+const uint8_t * getPeersString (NSArray *peers, GKSession *session) {
+    NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"["];
+    for (NSString *peer in peers) {
+        [retXML appendFormat:@"{\"id\":\"%@\",\"alias\":\"%@\"},", peer, [session displayNameForPeer:peer]];
+    }
+    return (const uint8_t *)[[[retXML substringToIndex:retXML.length-1] stringByAppendingString:@"]"] UTF8String];
+}
+
 @implementation TypeConversion
 
 - (FREResult) FREGetObject:(FREObject)object asString:(NSString**)value
@@ -219,8 +244,8 @@
 
 @implementation GKPlayer(JSONKitSerializing)
 
-- (uint8_t *)JSONString {
-    return (uint8_t *)[[[[NSString alloc] autorelease] initWithFormat:@"{\"id\":\"%@\",\"alias\":\"%@\"}", self.playerID, self.alias] UTF8String];
+- (const uint8_t *)JSONString {
+    return getPlayerString(self.playerID, self.alias, FALSE);
 }
 
 @end

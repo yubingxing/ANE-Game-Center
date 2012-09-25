@@ -33,6 +33,6 @@
 #define playerStatusChanged "playerStatusChanged"
 #define receivedClientRequest "receivedClientRequest"
 
-#define receivedData "received_data"
-
+#define received_data_from "received_data_from"
+#define matchPlayersInitialized "matchPlayersInitialized"
 #endif

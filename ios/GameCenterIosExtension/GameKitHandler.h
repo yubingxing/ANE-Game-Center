@@ -1,5 +1,5 @@
 //
-//  GameCenterHandler.h
+//  GameKitHandler.h
 //  GameCenterIosExtension
 //
 //  Created by Richard Lord on 18/06/2012.
@@ -13,7 +13,7 @@
 #import "JSONKit.h"
 
 
-@interface GameCenterHandler : NSObject <GKMatchDelegate,GKSessionDelegate,GKPeerPickerControllerDelegate> {
+@interface GameKitHandler : NSObject <GKMatchDelegate,GKSessionDelegate,GKPeerPickerControllerDelegate> {
     BOOL gameCenterAvailable;
     BOOL userAuthenticated;
     
@@ -24,18 +24,18 @@
 
 @property (assign, readonly) BOOL gameCenterAvailable;
 @property (assign, readonly) BOOL isMatchStarted;
-@property (retain) GKMatch *match;
 @property (retain) NSMutableDictionary *playersDict;
 @property (retain) GKInvite *pendingInvite;
 @property (retain) NSArray *pendingPlayersToInvite;
+@property (retain) __attribute__((NSObject)) GKMatch *match;
 
 @property BOOL isHost;
 @property uint32_t expectedPlayerCount;
-@property(retain) __attribute__((NSObject)) NSString *displayName;
-@property(retain) __attribute__((NSObject)) GKMatch *myMatch;
-@property(retain) __attribute__((NSObject)) GKSession *gameSession;
 
-+ (GameCenterHandler *)sharedInstance;
+void receiveFromPeer(NSData *data, NSString *peer, GKSession *session, void *context);
+void handleReceivedData(NSString * peer, NSData * data);
+
++ (GameKitHandler *)sharedInstance;
 - (id)initWithContext:(FREContext)extensionContext;
 - (void)lookupPlayers;
 

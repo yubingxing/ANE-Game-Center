@@ -1,6 +1,6 @@
 //
-//  GameCenterIosExtension
-//  GameCenterIosExtension.m
+//  GameKitIosExtension
+//  GameKitIosExtension.m
 //
 //  Created by Richard Lord on 19/12/2011.
 //  Copyright (c) 2012 Stick Sports Ltd. All rights reserved.
@@ -8,14 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "FlashRuntimeExtensions.h"
-#import "GameCenterHandler.h"
+#import "GameKitHandler.h"
 #import "GC_NativeMessages.h"
 
 #define DEFINE_ANE_FUNCTION(fn) FREObject (fn)(FREContext context, void* functionData, uint32_t argc, FREObject argv[])
 
 #define MAP_FUNCTION(fn, data) { (const uint8_t*)(#fn), (data), &(fn) }
 
-GameCenterHandler* GC_handler;
+GameKitHandler* GC_handler;
 
 DEFINE_ANE_FUNCTION( GC_isSupported )
 {
@@ -121,7 +121,7 @@ DEFINE_ANE_FUNCTION( GC_isBluetoothAvailable)
 {
     return [GC_handler isBluetoothAvailable];
 }
-//============================add gamecenter match func================================
+//============================add GameKit match func================================
 DEFINE_ANE_FUNCTION( GC_showMatchMaker )
 {
     return [GC_handler showMatchMaker:argv[0] maxPlayers:argv[1]];
@@ -151,10 +151,10 @@ DEFINE_ANE_FUNCTION( LP_denyPeer ) {
     return [GC_handler denyPeer:argv[0]];
 }
 
-void GameCenterContextInitializer( void* extData, const uint8_t* ctxType, FREContext ctx, uint32_t* numFunctionsToSet, const FRENamedFunction** functionsToSet )
+void GameKitContextInitializer( void* extData, const uint8_t* ctxType, FREContext ctx, uint32_t* numFunctionsToSet, const FRENamedFunction** functionsToSet )
 {
     static FRENamedFunction functionMap[] = {
-        //======================add gamecenter match func=====================
+        //======================add GameKit match func=====================
         MAP_FUNCTION( GC_showMatchMaker, NULL ),
         MAP_FUNCTION( GC_sendData, NULL ),
         MAP_FUNCTION( GC_sendDataToGCPlayers, NULL),
@@ -190,22 +190,25 @@ void GameCenterContextInitializer( void* extData, const uint8_t* ctxType, FRECon
 	*numFunctionsToSet = sizeof( functionMap ) / sizeof( FRENamedFunction );
 	*functionsToSet = functionMap;
     
-    GC_handler = [[GameCenterHandler alloc] initWithContext:ctx];
+    GC_handler = [[GameKitHandler alloc] initWithContext:ctx];
 }
 
-void GameCenterContextFinalizer( FREContext ctx )
+void GameKitContextFinalizer( FREContext ctx )
 {
+    NSLog(@"Context Distroyed");
 	return;
 }
 
-void GameCenterExtensionInitializer( void** extDataToSet, FREContextInitializer* ctxInitializerToSet, FREContextFinalizer* ctxFinalizerToSet ) 
-{ 
-    extDataToSet = NULL;  // This example does not use any extension data. 
-    *ctxInitializerToSet = &GameCenterContextInitializer;
-    *ctxFinalizerToSet = &GameCenterContextFinalizer;
+void GameKitExtensionInitializer( void** extDataToSet, FREContextInitializer* ctxInitializerToSet, FREContextFinalizer* ctxFinalizerToSet ) 
+{
+    NSLog(@"Context Initialized");
+    extDataToSet = NULL;  // This example does not use any extension data.
+    *ctxInitializerToSet = &GameKitContextInitializer;
+    *ctxFinalizerToSet = &GameKitContextFinalizer;
 }
 
-void GameCenterExtensionFinalizer()
+void GameKitExtensionFinalizer()
 {
+    NSLog(@"Context Distroyed");
     return;
 }

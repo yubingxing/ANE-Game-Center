@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <GameKit/GameKit.h>
 #import "FlashRuntimeExtensions.h"
-#import "GameCenterHandler.h"
+#import "GameKitHandler.h"
 #import "GC_BoardsController.h"
 
 @interface BoardsControllerPad : NSObject <BoardsController,GKLeaderboardViewControllerDelegate,GKAchievementViewControllerDelegate,GKMatchmakerViewControllerDelegate>

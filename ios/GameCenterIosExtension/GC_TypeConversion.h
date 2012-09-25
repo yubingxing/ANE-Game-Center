@@ -10,8 +10,12 @@
 #import <GameKit/GameKit.h>
 #import "FlashRuntimeExtensions.h"
 
+const uint8_t * getPlayerString (NSString *id, NSString *alias, BOOL available);
+const uint8_t * getPlayersString (NSArray *players);
+const uint8_t * getPeersString (NSArray *peers, GKSession *session);
+
 @interface GKPlayer (JSONKitSerializing)
-- (uint8_t *)JSONString;
+- (const uint8_t *)JSONString;
 @end
 @interface TypeConversion : NSObject
 

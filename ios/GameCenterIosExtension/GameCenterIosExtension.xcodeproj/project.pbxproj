@@ -20,14 +20,14 @@
 		79ED079D152B5E40006EA7E5 /* GC_LeaderboardWithNames.m in Sources */ = {isa = PBXBuildFile; fileRef = 79ED079B152B5E40006EA7E5 /* GC_LeaderboardWithNames.m */; };
 		79ED1B0E158F5D8A003B20F6 /* GC_TypeConversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 79ED1B0C158F5D8A003B20F6 /* GC_TypeConversion.h */; };
 		79ED1B0F158F5D8A003B20F6 /* GC_TypeConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 79ED1B0D158F5D8A003B20F6 /* GC_TypeConversion.m */; };
-		79ED1B12158F61E8003B20F6 /* GameCenterHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 79ED1B10158F61E8003B20F6 /* GameCenterHandler.h */; };
-		79ED1B13158F61E8003B20F6 /* GameCenterHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 79ED1B11158F61E8003B20F6 /* GameCenterHandler.m */; };
+		79ED1B12158F61E8003B20F6 /* GameKitHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 79ED1B10158F61E8003B20F6 /* GameKitHandler.h */; };
+		79ED1B13158F61E8003B20F6 /* GameKitHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 79ED1B11158F61E8003B20F6 /* GameKitHandler.m */; };
 		79FA57BE14F01DE8002FB6AF /* GC_BoardsController.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57B914F01DE8002FB6AF /* GC_BoardsController.h */; };
 		79FA57BF14F01DE8002FB6AF /* GC_BoardsControllerPad.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57BA14F01DE8002FB6AF /* GC_BoardsControllerPad.h */; };
 		79FA57C014F01DE8002FB6AF /* GC_BoardsControllerPad.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FA57BB14F01DE8002FB6AF /* GC_BoardsControllerPad.m */; };
 		79FA57C114F01DE8002FB6AF /* GC_BoardsControllerPhone.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57BC14F01DE8002FB6AF /* GC_BoardsControllerPhone.h */; };
 		79FA57C214F01DE8002FB6AF /* GC_BoardsControllerPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FA57BD14F01DE8002FB6AF /* GC_BoardsControllerPhone.m */; };
-		79FA57CC14F01E04002FB6AF /* GameCenterIosExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FA57C714F01E04002FB6AF /* GameCenterIosExtension.m */; };
+		79FA57CC14F01E04002FB6AF /* GameKitIosExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FA57C714F01E04002FB6AF /* GameKitIosExtension.m */; };
 		79FA57CD14F01E04002FB6AF /* GC_NativeMessages.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FA57C814F01E04002FB6AF /* GC_NativeMessages.h */; };
 /* End PBXBuildFile section */
 
@@ -46,14 +46,14 @@
 		79ED079B152B5E40006EA7E5 /* GC_LeaderboardWithNames.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GC_LeaderboardWithNames.m; sourceTree = "<group>"; };
 		79ED1B0C158F5D8A003B20F6 /* GC_TypeConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GC_TypeConversion.h; sourceTree = "<group>"; };
 		79ED1B0D158F5D8A003B20F6 /* GC_TypeConversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GC_TypeConversion.m; sourceTree = "<group>"; };
-		79ED1B10158F61E8003B20F6 /* GameCenterHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameCenterHandler.h; sourceTree = "<group>"; };
-		79ED1B11158F61E8003B20F6 /* GameCenterHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameCenterHandler.m; sourceTree = "<group>"; };
+		79ED1B10158F61E8003B20F6 /* GameKitHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameKitHandler.h; sourceTree = "<group>"; };
+		79ED1B11158F61E8003B20F6 /* GameKitHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameKitHandler.m; sourceTree = "<group>"; };
 		79FA57B914F01DE8002FB6AF /* GC_BoardsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GC_BoardsController.h; sourceTree = SOURCE_ROOT; };
 		79FA57BA14F01DE8002FB6AF /* GC_BoardsControllerPad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GC_BoardsControllerPad.h; sourceTree = SOURCE_ROOT; };
 		79FA57BB14F01DE8002FB6AF /* GC_BoardsControllerPad.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GC_BoardsControllerPad.m; sourceTree = SOURCE_ROOT; };
 		79FA57BC14F01DE8002FB6AF /* GC_BoardsControllerPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GC_BoardsControllerPhone.h; sourceTree = SOURCE_ROOT; };
 		79FA57BD14F01DE8002FB6AF /* GC_BoardsControllerPhone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GC_BoardsControllerPhone.m; sourceTree = SOURCE_ROOT; };
-		79FA57C714F01E04002FB6AF /* GameCenterIosExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameCenterIosExtension.m; sourceTree = "<group>"; };
+		79FA57C714F01E04002FB6AF /* GameKitIosExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameKitIosExtension.m; sourceTree = "<group>"; };
 		79FA57C814F01E04002FB6AF /* GC_NativeMessages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GC_NativeMessages.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -79,9 +79,9 @@
 				1B58A0401602D58000499298 /* FRETypeConversion.m */,
 				1B58A03A1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.h */,
 				1B58A03B1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.m */,
-				79FA57C714F01E04002FB6AF /* GameCenterIosExtension.m */,
-				79ED1B10158F61E8003B20F6 /* GameCenterHandler.h */,
-				79ED1B11158F61E8003B20F6 /* GameCenterHandler.m */,
+				79FA57C714F01E04002FB6AF /* GameKitIosExtension.m */,
+				79ED1B10158F61E8003B20F6 /* GameKitHandler.h */,
+				79ED1B11158F61E8003B20F6 /* GameKitHandler.m */,
 				79ED1B0C158F5D8A003B20F6 /* GC_TypeConversion.h */,
 				79ED1B0D158F5D8A003B20F6 /* GC_TypeConversion.m */,
 				79ED079A152B5E40006EA7E5 /* GC_LeaderboardWithNames.h */,
@@ -131,7 +131,7 @@
 				79FA57CD14F01E04002FB6AF /* GC_NativeMessages.h in Headers */,
 				79ED079C152B5E40006EA7E5 /* GC_LeaderboardWithNames.h in Headers */,
 				79ED1B0E158F5D8A003B20F6 /* GC_TypeConversion.h in Headers */,
-				79ED1B12158F61E8003B20F6 /* GameCenterHandler.h in Headers */,
+				79ED1B12158F61E8003B20F6 /* GameKitHandler.h in Headers */,
 				1B58A03C1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.h in Headers */,
 				1B58A0411602D58000499298 /* FRETypeConversion.h in Headers */,
 			);
@@ -190,10 +190,10 @@
 			files = (
 				79FA57C014F01DE8002FB6AF /* GC_BoardsControllerPad.m in Sources */,
 				79FA57C214F01DE8002FB6AF /* GC_BoardsControllerPhone.m in Sources */,
-				79FA57CC14F01E04002FB6AF /* GameCenterIosExtension.m in Sources */,
+				79FA57CC14F01E04002FB6AF /* GameKitIosExtension.m in Sources */,
 				79ED079D152B5E40006EA7E5 /* GC_LeaderboardWithNames.m in Sources */,
 				79ED1B0F158F5D8A003B20F6 /* GC_TypeConversion.m in Sources */,
-				79ED1B13158F61E8003B20F6 /* GameCenterHandler.m in Sources */,
+				79ED1B13158F61E8003B20F6 /* GameKitHandler.m in Sources */,
 				1B58A03D1602D56F00499298 /* GKMatchmakerViewController-LandscapeOnly.m in Sources */,
 				1B58A0421602D58000499298 /* FRETypeConversion.m in Sources */,
 			);

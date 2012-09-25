@@ -1,12 +1,12 @@
 //
-//  GameCenterHandler.m
-//  GameCenterIosExtension
+//  GameKitHandler.m
+//  GameKitIosExtension
 //
 //  Created by Richard Lord on 18/06/2012.
 //  Copyright (c) 2012 Stick Sports Ltd. All rights reserved.
 //
 
-#import "GameCenterHandler.h"
+#import "GameKitHandler.h"
 #import <GameKit/GameKit.h>
 #import "GC_NativeMessages.h"
 #import "GC_BoardsController.h"
@@ -17,34 +17,35 @@
 
 #define DISPATCH_STATUS_EVENT(extensionContext, code, status) FREDispatchStatusEventAsync((extensionContext), (uint8_t*)code, (uint8_t*)status)
 
-#define ASLocalPlayer "com.icestar.gameCenter.GCLocalPlayer"
-#define ASLeaderboard "com.icestar.gameCenter.GCLeaderboard"
-#define ASVectorScore "Vector.<com.icestar.gameCenter.GCScore>"
-#define ASVectorAchievement "Vector.<com.icestar.gameCenter.GCAchievement>"
+#define ASLocalPlayer "com.icestar.gamekit.GCLocalPlayer"
+#define ASLeaderboard "com.icestar.gamekit.GCLeaderboard"
+#define ASVectorScore "Vector.<com.icestar.gamekit.GCScore>"
+#define ASVectorAchievement "Vector.<com.icestar.gamekit.GCAchievement>"
 
-@interface GameCenterHandler () {
+@interface GameKitHandler () {
     GKPeerPickerController *picker;
 }
 @property (retain)NSMutableDictionary* returnObjects;
 @property (retain)id<BoardsController> boardsController;
 @property (retain)TypeConversion* converter;
+@property(retain) __attribute__((NSObject)) NSString *displayName;
+@property(retain) __attribute__((NSObject)) GKSession *gameSession;
 
 @end
 
-@implementation GameCenterHandler
+@implementation GameKitHandler
 
 @synthesize returnObjects, boardsController, converter;
 @synthesize gameCenterAvailable;
 @synthesize isMatchStarted;
-@synthesize match;
-@synthesize gameSession;
 @synthesize playersDict;
 @synthesize pendingInvite;
 @synthesize pendingPlayersToInvite;
+@synthesize match;
 
 static FREContext context;
-static GameCenterHandler *_sharedHelper = nil;
-+ (GameCenterHandler *) sharedInstance {
+static GameKitHandler *_sharedHelper = nil;
++ (GameKitHandler *) sharedInstance {
     return _sharedHelper;
 }
 
@@ -200,11 +201,11 @@ static GameCenterHandler *_sharedHelper = nil;
          {
              if( error == nil )
              {
-                 DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", scoreReported );
+                 DISPATCH_STATUS_EVENT( context, nil, scoreReported );
              }
              else
              {
-                 DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", scoreNotReported );
+                 DISPATCH_STATUS_EVENT( context, nil, scoreNotReported );
              }
          }];
     }
@@ -747,6 +748,15 @@ static GameCenterHandler *_sharedHelper = nil;
     return FALSE;
 }
 
+- (void) handleInvitation {
+    [GKMatchmaker sharedMatchmaker].inviteHandler = ^(GKInvite *acceptedInvite, NSArray *playersToInvite) {
+        self.pendingInvite = acceptedInvite;
+        self.pendingPlayersToInvite = playersToInvite;
+        [self createBoardsController];
+        [self.boardsController displayMatchMaker:2 max:4];
+    };
+}
+
 - (void)matchEnded {
     NSLog(@"Match ended");
     [self.match disconnect];
@@ -817,7 +827,21 @@ static GameCenterHandler *_sharedHelper = nil;
     return nil;
 }
 
+-(void) initializeMatchPlayers {
+    [GKPlayer loadPlayersForIdentifiers:[self.match playerIDs] withCompletionHandler:^(NSArray *players, NSError *error) { 
+        if(error){
+            //Handler load player info error;
+        }else{
+            DISPATCH_STATUS_EVENT(context, getPlayersString(players), matchPlayersInitialized);
+        };
+    }];
+}
+
 #pragma mark Add local net p2p connect
+
+void initializeSessionPlayers(GKSession *session, NSArray *peers){
+    DISPATCH_STATUS_EVENT(context, getPeersString(peers, session), matchPlayersInitialized);
+}
 
 /**
  Check whether Bluetooth is available on your device.
@@ -877,8 +901,10 @@ static GameCenterHandler *_sharedHelper = nil;
 - (FREObject) denyPeer:(FREContext)peerId {
     NSString *peerID = nil;
     GC_FREGetObjectAsString(peerId, &peerID);
+    
+    uint32_t timeInterval = 10000;
 
-    [self.gameSession denyConnectionFromPeer:peerID];
+    [self.gameSession denyConnectionFromPeer:peerID withTimeout:timeInterval];
     return nil;
 }
 
@@ -896,20 +922,17 @@ static GameCenterHandler *_sharedHelper = nil;
 /* Indicates a state change for the given peer.
  */
 - (void)session:(GKSession *)session peer:(NSString *)peerID didChangeState:(GKPeerConnectionState)state {
-    NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"{"];
-    [retXML appendFormat:@"\"peerId\":\"%@\"", peerID];
-    [retXML appendFormat:@",\"name\":\"%@\"", [session displayNameForPeer:peerID]];
-    
+    BOOL available = FALSE;
     switch (state)
     {
         case GKPeerStateAvailable:
-            [retXML appendFormat:@",\"available\":1"];
+            available = TRUE;
             break;
         default:
             break;
     }
-    [retXML appendFormat:@"}"];
-    DISPATCH_STATUS_EVENT(context, (const uint8_t*)[retXML UTF8String], playerStatusChanged);
+
+    DISPATCH_STATUS_EVENT(context, getPlayerString(peerID, [session displayNameForPeer:peerID], available), playerStatusChanged);
 
 }
 
@@ -919,11 +942,7 @@ static GameCenterHandler *_sharedHelper = nil;
  Deny by calling -denyConnectionFromPeer:
  */
 - (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID {
-    NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"{"];
-    [retXML appendFormat:@"\"peerId\":\"%@\"", peerID];
-    [retXML appendFormat:@",\"name\":\"%@\"", [session displayNameForPeer:peerID]];
-    [retXML appendFormat:@"}"];
-    DISPATCH_STATUS_EVENT(context, (const uint8_t*)[retXML UTF8String], receivedClientRequest);
+    DISPATCH_STATUS_EVENT(context, getPlayerString(peerID, [session displayNameForPeer:peerID], FALSE), receivedClientRequest);
 }
 
 /* Indicates a connection error occurred with a peer, which includes connection request failures, or disconnects due to timeouts.
@@ -972,35 +991,14 @@ static GameCenterHandler *_sharedHelper = nil;
     handleReceivedData(peer, data);
 }
 
+void receiveFromPeer(NSData *data, NSString *peer, GKSession *session, void *context)
+{
+    handleReceivedData(peer, data);
+}
+
 void handleReceivedData(NSString * peer, NSData * data) {
     NSString *datastr = [NSString stringWithUTF8String:[data bytes]];
     datastr = [peer stringByAppendingFormat:@"%@::%@", peer, datastr];
-    DISPATCH_STATUS_EVENT(context, (const uint8_t*)[datastr UTF8String], receivedData);
-}
-- (void) handleInvitation {
-    [self match].inviteHandler = ^(GKInvite *acceptedInvite, NSArray *playersToInvite) {
-        // Insert application-specific code here to clean up any games in progress.
-        if (acceptedInvite)
-        {
-            GKMatchmakerViewController *mmvc = [[GKMatchmakerViewController alloc] initWithInvite:acceptedInvite];
-            mmvc.matchmakerDelegate = observer;
-            showModalViewController(mmvc);
-            
-            //  observer.isHost = NO;
-        }
-        else if (playersToInvite)
-        {
-            GKMatchRequest *request = [[GKMatchRequest alloc] init];
-            request.minPlayers = 2;
-            request.maxPlayers = 4;
-            request.playersToInvite = playersToInvite;
-            
-            GKMatchmakerViewController *mmvc = [[GKMatchmakerViewController alloc] initWithMatchRequest:request];
-            mmvc.matchmakerDelegate = observer;
-            showModalViewController(mmvc);
-            
-            // observer.isHost = YES;
-        }
-    };
+    DISPATCH_STATUS_EVENT(context, (const uint8_t*)[datastr UTF8String], received_data_from);
 }
 @end

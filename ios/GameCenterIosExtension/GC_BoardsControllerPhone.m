@@ -107,7 +107,7 @@
 
 -(void) displayMatchMaker:(uint32_t)min max:(uint32_t)max
 {
-    GameCenterHandler *gc = [GameCenterHandler sharedInstance];
+    GameKitHandler *gc = [GameKitHandler sharedInstance];
     [[self presentingViewController] dismissModalViewControllerAnimated:NO];
     GKMatchmakerViewController *mmvc = nil;
     if (gc.pendingInvite != nil) {
@@ -147,7 +147,7 @@
 // A peer-to-peer match has been found, the game should start
 - (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFindMatch:(GKMatch *)theMatch {
     [[self presentingViewController] dismissModalViewControllerAnimated:YES];
-    GameCenterHandler *gc = [GameCenterHandler sharedInstance];
+    GameKitHandler *gc = [GameKitHandler sharedInstance];
     gc.match = theMatch;
     theMatch.delegate = gc;
     if (!gc.isMatchStarted && theMatch.expectedPlayerCount == 0) {

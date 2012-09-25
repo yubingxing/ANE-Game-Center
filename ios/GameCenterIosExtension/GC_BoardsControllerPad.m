@@ -100,7 +100,7 @@
 
 -(void) displayMatchMaker:(uint32_t)min max:(uint32_t)max
 {
-    GameCenterHandler *gc = [GameCenterHandler sharedInstance];
+    GameKitHandler *gc = [GameKitHandler sharedInstance];
     [win.rootViewController dismissModalViewControllerAnimated:YES];
     GKMatchmakerViewController *mmvc = nil;
     if (gc.pendingInvite != nil) {
@@ -123,22 +123,25 @@
 #pragma mark GKMatchmakerViewControllerDelegate
 
 // The user has cancelled matchmaking
-- (void)matchmakerViewControllerWasCancelled:(GKMatchmakerViewController *)viewController {
+- (void)matchmakerViewControllerWasCancelled:(GKMatchmakerViewController *)viewController
+{
     [win.rootViewController dismissModalViewControllerAnimated:YES];
     FREDispatchStatusEventAsync(context, (const uint8_t *)"", gameCenterViewRemoved);
 
 }
 
 // Matchmaking has failed with an error
-- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFailWithError:(NSError *)error {
+- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFailWithError:(NSError *)error
+{
     [win.rootViewController dismissModalViewControllerAnimated:YES];
     NSLog(@"Error finding match: %@", error.localizedDescription);
 }
 
 // A peer-to-peer match has been found, the game should start
-- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFindMatch:(GKMatch *)theMatch {
+- (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFindMatch:(GKMatch *)theMatch
+{
     [win.rootViewController dismissModalViewControllerAnimated:YES];
-    GameCenterHandler *gc = [GameCenterHandler sharedInstance];
+    GameKitHandler *gc = [GameKitHandler sharedInstance];
     gc.match = theMatch;
     theMatch.delegate = gc;
     if (!gc.isMatchStarted && theMatch.expectedPlayerCount == 0) {
