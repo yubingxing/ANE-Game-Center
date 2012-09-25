@@ -112,23 +112,27 @@ DEFINE_ANE_FUNCTION( GC_showMatchMaker )
     return [GC_handler showMatchMaker:argv[0] maxPlayers:argv[1]];
 }
 
+DEFINE_ANE_FUNCTION( GC_sendDataToGCPlayers ) {
+    return [GC_handler sendDataToGCPlayers:argv[0] msg:argv[1]];
+}
+
 DEFINE_ANE_FUNCTION( GC_sendData ) {
     return [GC_handler sendData:argv[0]];
 }
 //=============================add local p2p func==================================
-DEFINE_ANE_FUNCTION( GC_requestPeerMatch ) {
+DEFINE_ANE_FUNCTION( LP_requestPeerMatch ) {
     return [GC_handler requestPeerMatch:argv[0]];
 }
 
-DEFINE_ANE_FUNCTION( GC_joinServer ) {
+DEFINE_ANE_FUNCTION( LP_joinServer ) {
     return [GC_handler joinServer:argv[0]];
 }
 
-DEFINE_ANE_FUNCTION( GC_acceptPeer ) {
+DEFINE_ANE_FUNCTION( LP_acceptPeer ) {
     return [GC_handler acceptPeer:argv[0]];
 }
 
-DEFINE_ANE_FUNCTION( GC_denyPeer ) {
+DEFINE_ANE_FUNCTION( LP_denyPeer ) {
     return [GC_handler denyPeer:argv[0]];
 }
 
@@ -156,11 +160,12 @@ void GameCenterContextInitializer( void* extData, const uint8_t* ctxType, FRECon
         //======================add gamecenter match func=====================
         MAP_FUNCTION( GC_showMatchMaker, NULL ),
         MAP_FUNCTION( GC_sendData, NULL ),
+        MAP_FUNCTION( GC_sendDataToGCPlayers, NULL),
         //======================add local p2p connection======================
-        MAP_FUNCTION( GC_requestPeerMatch, NULL ),
-        MAP_FUNCTION( GC_joinServer, NULL ),
-        MAP_FUNCTION( GC_acceptPeer, NULL ),
-        MAP_FUNCTION( GC_denyPeer, NULL )
+        MAP_FUNCTION( LP_requestPeerMatch, NULL ),
+        MAP_FUNCTION( LP_joinServer, NULL ),
+        MAP_FUNCTION( LP_acceptPeer, NULL ),
+        MAP_FUNCTION( LP_denyPeer, NULL )
     };
     
 	*numFunctionsToSet = sizeof( functionMap ) / sizeof( FRENamedFunction );

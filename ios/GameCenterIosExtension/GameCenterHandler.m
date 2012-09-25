@@ -25,7 +25,6 @@
 @interface GameCenterHandler () {
     GKPeerPickerController *picker;
 }
-@property FREContext context;
 @property (retain)NSMutableDictionary* returnObjects;
 @property (retain)id<BoardsController> boardsController;
 @property (retain)TypeConversion* converter;
@@ -34,7 +33,7 @@
 
 @implementation GameCenterHandler
 
-@synthesize context, returnObjects, boardsController, converter;
+@synthesize returnObjects, boardsController, converter;
 @synthesize gameCenterAvailable;
 @synthesize isMatchStarted;
 @synthesize match;
@@ -43,6 +42,7 @@
 @synthesize pendingInvite;
 @synthesize pendingPlayersToInvite;
 
+static FREContext context;
 static GameCenterHandler *_sharedHelper = nil;
 + (GameCenterHandler *) sharedInstance {
     return _sharedHelper;
@@ -122,7 +122,7 @@ static GameCenterHandler *_sharedHelper = nil;
         if ( localPlayer.isAuthenticated )
         {
             userAuthenticated = YES;
-            DISPATCH_STATUS_EVENT( self.context, [localPlayer JSONString], localPlayerAuthenticated );
+            DISPATCH_STATUS_EVENT( context, [localPlayer JSONString], localPlayerAuthenticated );
             return NULL;
         }
         else
@@ -131,12 +131,13 @@ static GameCenterHandler *_sharedHelper = nil;
                 if( localPlayer.isAuthenticated )
                 {
                     userAuthenticated = YES;
-                    DISPATCH_STATUS_EVENT( self.context, [localPlayer JSONString], localPlayerAuthenticated );
+                    DISPATCH_STATUS_EVENT( context, [localPlayer JSONString], localPlayerAuthenticated );
+                    handleInvitation();
                 }
                 else
                 {
                     userAuthenticated = NO;
-                    DISPATCH_STATUS_EVENT( self.context, [localPlayer JSONString], localPlayerNotAuthenticated );
+                    DISPATCH_STATUS_EVENT( context, [localPlayer JSONString], localPlayerNotAuthenticated );
                 }
             }];
         }
@@ -159,7 +160,7 @@ static GameCenterHandler *_sharedHelper = nil;
     }
     else
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
     }
     return NULL;
 }
@@ -175,7 +176,7 @@ static GameCenterHandler *_sharedHelper = nil;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -187,11 +188,11 @@ static GameCenterHandler *_sharedHelper = nil;
          {
              if( error == nil )
              {
-                 DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", scoreReported );
+                 DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", scoreReported );
              }
              else
              {
-                 DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", scoreNotReported );
+                 DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", scoreNotReported );
              }
          }];
     }
@@ -242,7 +243,7 @@ static GameCenterHandler *_sharedHelper = nil;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -287,19 +288,19 @@ static GameCenterHandler *_sharedHelper = nil;
                       }
                       leaderboardWithNames.names = names;
                       NSString* code = [self storeReturnObject:leaderboardWithNames];
-                      DISPATCH_STATUS_EVENT( self.context, code.UTF8String, loadLeaderboardComplete );
+                      DISPATCH_STATUS_EVENT( context, code.UTF8String, loadLeaderboardComplete );
                   }
                   else
                   {
                       [leaderboardWithNames release];
-                      DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadLeaderboardFailed );
+                      DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", loadLeaderboardFailed );
                   }
               }];
          }
          else
          {
              [leaderboard release];
-             DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadLeaderboardFailed );
+             DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", loadLeaderboardFailed );
          }
      }];
     return NULL;
@@ -319,7 +320,7 @@ static GameCenterHandler *_sharedHelper = nil;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -335,11 +336,11 @@ static GameCenterHandler *_sharedHelper = nil;
          {
              if( error == nil )
              {
-                 DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", achievementReported );
+                 DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", achievementReported );
              }
              else
              {
-                 DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", achievementNotReported );
+                 DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", achievementNotReported );
              }
          }];
     }
@@ -359,7 +360,7 @@ static GameCenterHandler *_sharedHelper = nil;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -369,11 +370,11 @@ static GameCenterHandler *_sharedHelper = nil;
          {
              [achievements retain];
              NSString* code = [self storeReturnObject:achievements];
-             DISPATCH_STATUS_EVENT( self.context, code.UTF8String, loadAchievementsComplete );
+             DISPATCH_STATUS_EVENT( context, code.UTF8String, loadAchievementsComplete );
          }
          else
          {
-             DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadAchievementsFailed );
+             DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", loadAchievementsFailed );
          }
      }];
     return NULL;
@@ -384,7 +385,7 @@ static GameCenterHandler *_sharedHelper = nil;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     [localPlayer loadFriendsWithCompletionHandler:^(NSArray *friendIds, NSError *error)
@@ -395,7 +396,7 @@ static GameCenterHandler *_sharedHelper = nil;
              {
                  [friendIds retain];
                  NSString* code = [self storeReturnObject:friendIds];
-                 DISPATCH_STATUS_EVENT( self.context, code.UTF8String, loadFriendsComplete );
+                 DISPATCH_STATUS_EVENT( context, code.UTF8String, loadFriendsComplete );
              }
              else
              {
@@ -405,18 +406,18 @@ static GameCenterHandler *_sharedHelper = nil;
                       {
                           [friendDetails retain];
                           NSString* code = [self storeReturnObject:friendDetails];
-                          DISPATCH_STATUS_EVENT( self.context, code.UTF8String, loadFriendsComplete );
+                          DISPATCH_STATUS_EVENT( context, code.UTF8String, loadFriendsComplete );
                       }
                       else
                       {
-                          DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadFriendsFailed );
+                          DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", loadFriendsFailed );
                       }
                   }];
              }
          }
          else
          {
-             DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadFriendsFailed );
+             DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", loadFriendsFailed );
          }
      }];
     return NULL;
@@ -427,7 +428,7 @@ static GameCenterHandler *_sharedHelper = nil;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -451,12 +452,12 @@ static GameCenterHandler *_sharedHelper = nil;
          if( error == nil && scores != nil )
          {
              NSString* code = [self storeReturnObject:leaderboard];
-             DISPATCH_STATUS_EVENT( self.context, code.UTF8String, loadLocalPlayerScoreComplete );
+             DISPATCH_STATUS_EVENT( context, code.UTF8String, loadLocalPlayerScoreComplete );
          }
          else
          {
              [leaderboard release];
-             DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", loadLocalPlayerScoreFailed );
+             DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", loadLocalPlayerScoreFailed );
          }
      }];
     return NULL;
@@ -467,7 +468,7 @@ static GameCenterHandler *_sharedHelper = nil;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -506,7 +507,7 @@ static GameCenterHandler *_sharedHelper = nil;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
     if( !localPlayer.isAuthenticated )
     {
-        DISPATCH_STATUS_EVENT( self.context, (const uint8_t *)"", notAuthenticated );
+        DISPATCH_STATUS_EVENT( context, (const uint8_t *)"", notAuthenticated );
         return NULL;
     }
     
@@ -649,14 +650,14 @@ static GameCenterHandler *_sharedHelper = nil;
             
             // Notify delegate match can begin
             isMatchStarted = YES;
-            [self matchStarted];
+            DISPATCH_STATUS_EVENT(context, (const uint8_t *)"", MatchStarted);
             
         }
     }];
     
 }
 
-
+// start match maker request and show the matchmaker view
 - (FREObject)showMatchMaker:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers {
     
     if (!gameCenterAvailable) return NULL;
@@ -670,7 +671,6 @@ static GameCenterHandler *_sharedHelper = nil;
     FREGetObjectAsInt32(minPlayers, &min);
     FREGetObjectAsInt32(maxPlayers, &max);
     [self.boardsController displayMatchMaker:min max:max];
-  
     return nil;
 }
 
@@ -678,68 +678,9 @@ static GameCenterHandler *_sharedHelper = nil;
 
 // The match received data sent from the player.
 - (void)match:(GKMatch *)theMatch didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID {
-    
     if (match != theMatch) return;
     
-    // Store away other player ID for later
-    if (otherPlayerID == nil) {
-        otherPlayerID = [playerID retain];
-    }
-    
-//    Message *message = (Message *) [data bytes];
-//    if (message->messageType == kMessageTypeRandomNumber) {
-//        
-//        MessageRandomNumber * messageInit = (MessageRandomNumber *) [data bytes];
-//        NSLog(@"Received random number: %ud, ours %ud", messageInit->randomNumber, ourRandom);
-//        bool tie = false;
-//        
-//        if (messageInit->randomNumber == ourRandom) {
-//            NSLog(@"TIE!");
-//            tie = true;
-//            ourRandom = arc4random();
-//            [self sendRandomNumber];
-//        } else if (ourRandom > messageInit->randomNumber) {
-//            NSLog(@"We are player 1");
-//            isPlayer1 = YES;
-//        } else {
-//            NSLog(@"We are player 2");
-//            isPlayer1 = NO;
-//        }
-//        
-//        if (!tie) {
-//            receivedRandom = YES;
-//            if (gameState == kGameStateWaitingForRandomNumber) {
-//                [self setGameState:kGameStateWaitingForStart];
-//            }
-//            [self tryStartGame];
-//        }
-//        
-//    } else if (message->messageType == kMessageTypeGameBegin) {
-//        
-//        [self setGameState:kGameStateActive];
-//        [self setupStringsWithOtherPlayerId:playerID];
-//        
-//    } else if (message->messageType == kMessageTypeMove) {
-//        
-//        NSLog(@"Received move");
-//        
-//        if (isPlayer1) {
-//            [player2 moveForward];
-//        } else {
-//            [player1 moveForward];
-//        }
-//    } else if (message->messageType == kMessageTypeGameOver) {
-//        
-//        MessageGameOver * messageGameOver = (MessageGameOver *) [data bytes];
-//        NSLog(@"Received game over with player 1 won: %d", messageGameOver->player1Won);
-//        
-//        if (messageGameOver->player1Won) {
-//            [self endScene:kEndReasonLose];
-//        } else {
-//            [self endScene:kEndReasonWin];
-//        }
-//        
-//    }
+    handleReceivedData(playerID, data);
 }
 
 // The player state changed (eg. connected or disconnected)
@@ -788,30 +729,17 @@ static GameCenterHandler *_sharedHelper = nil;
     [self matchEnded];
 }
 
-#pragma mark GameCenterDelegate
-- (void)matchStarted {
-    NSLog(@"Match started");
-    if (receivedRandom) {
-//        [self setGameState:kGameStateWaitingForStart];
-    } else {
-//        [self setGameState:kGameStateWaitingForRandomNumber];
-    }
-//    [self sendRandomNumber];
-//    [self tryStartGame];
-    DISPATCH_STATUS_EVENT(self.context, (const uint8_t *)"", MatchStarted);
-}
-
-- (void)inviteReceived {
-//    [self restartTapped:nil];
-    DISPATCH_STATUS_EVENT(self.context, (const uint8_t *)"", InviteReceived);
+// This method is called when the match is interrupted; if it returns YES, a new invite will be sent to attempt reconnection. This is supported only for 1v1 games
+- (BOOL)match:(GKMatch *)match shouldReinvitePlayer:(NSString *)playerID {
+    
+    return FALSE;
 }
 
 - (void)matchEnded {
     NSLog(@"Match ended");
     [self.match disconnect];
     self.match = nil;
-    DISPATCH_STATUS_EVENT(self.context, (const uint8_t *)"", MatchEnded);
-//    [self endScene:kEndReasonDisconnect];
+    DISPATCH_STATUS_EVENT(context, (const uint8_t *)"", MatchEnded);
 }
 
 - (FREObject)sendData:(FREObject)msg {
@@ -833,6 +761,29 @@ static GameCenterHandler *_sharedHelper = nil;
         NSLog(@"Error sending init packet");
         [self matchEnded];
     }
+    return nil;
+}
+
+- (FREObject) sendDataToGCPlayers:(FREObject)playerIds msg:(FREObject)msg {
+    //创建msg来寄存发送的信息
+    const uint8_t* _msg = nil;
+    uint32_t len = -1;
+    
+    //将信息寄存在msg中
+    FREGetObjectAsUTF8(msg, &len, &_msg);
+    const char* datachar = (const char*) _msg;
+    
+    NSString *_playerIds = nil;
+    GC_FREGetObjectAsString(playerIds, &_playerIds);
+    
+    //创建players来寄存接收玩家列表
+    NSArray *players = [_playerIds componentsSeparatedByString:@","];
+    
+    
+    //将发送的信息保存在一个NSData中
+    NSData *packet = [NSData dataWithBytes:datachar length:strlen(datachar)];
+    //使用GKMatch的sendData方法将信息发送给指定的玩家们
+    [self.match sendData:packet toPlayers:players withDataMode:GKSendDataUnreliable error:nil];
     return nil;
 }
 
@@ -991,7 +942,15 @@ FREObject alert(FREContext ctx,void* funcData, uint32_t argc, FREObject argv[]){
 - (void) receiveData:(NSData *)data fromPeer:(NSString *)peer inSession: (GKSession *)session context:(void *)context
 {
 //    NSLog([NSString stringWithUTF8String:(const char*)[data bytes]]);
-//    handleReceivedData(data);
+    handleReceivedData(peer, data);
 }
 
+void handleReceivedData(NSString * peer, NSData * data) {
+    NSString *datastr = [NSString stringWithUTF8String:[data bytes]];
+    datastr = [peer stringByAppendingFormat:@"%@::%@", peer, datastr];
+    DISPATCH_STATUS_EVENT(context, (const uint8_t*)[datastr UTF8String], receivedData);
+}
+void handleInvitation() {
+    
+}
 @end

@@ -23,10 +23,11 @@ package com.icestar.gamecenter
 		// add gamecenter match func
 		internal static const showMatchMaker : String = "GC_showMatchMaker";
 		internal static const sendData : String = "GC_sendData";
+		internal static const sendDataToGCPlayers : String = "GC_sendDataToGCPlayers";
 		// add local p2p func
-		internal static const requestPeerMatch : String = "GC_requestPeerMatch";
-		internal static const joinServer : String = "GC_joinServer";
-		internal static const acceptPeer : String = "GC_acceptPeer";
-		internal static const denyPeer : String = "GC_denyPeer";
+		internal static const requestPeerMatch : String = "LP_requestPeerMatch";
+		internal static const joinServer : String = "LP_joinServer";
+		internal static const acceptPeer : String = "LP_acceptPeer";
+		internal static const denyPeer : String = "LP_denyPeer";
 	}
 }

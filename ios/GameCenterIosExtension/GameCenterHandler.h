@@ -13,13 +13,7 @@
 #import "JSONKit.h"
 
 
-@protocol GameCenterDelegate
-- (void)matchStarted;
-- (void)matchEnded;
-- (void)inviteReceived;
-@end
-
-@interface GameCenterHandler : NSObject <GKMatchDelegate,GKSessionDelegate,GKPeerPickerControllerDelegate,GameCenterDelegate> {
+@interface GameCenterHandler : NSObject <GKMatchDelegate,GKSessionDelegate,GKPeerPickerControllerDelegate> {
     BOOL gameCenterAvailable;
     BOOL userAuthenticated;
     
@@ -29,11 +23,6 @@
     NSMutableDictionary *playersDict;
     GKInvite *pendingInvite;
     NSArray *pendingPlayersToInvite;
-    
-    uint32_t ourRandom;
-    BOOL receivedRandom;
-    NSString *otherPlayerID;
-    
 }
 
 @property (assign, readonly) BOOL gameCenterAvailable;
@@ -50,6 +39,7 @@
 
 // Add findMatch function
 - (FREObject) showMatchMaker:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers;
+- (FREObject) sendDataToGCPlayers:(FREObject)playerIds msg:(FREObject)msg;
 
 - (FREObject) isSupported;
 - (FREObject) authenticateLocalPlayer;
