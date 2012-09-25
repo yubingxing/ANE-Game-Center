@@ -106,6 +106,21 @@ DEFINE_ANE_FUNCTION( GC_getStoredPlayers )
 {
     return [GC_handler getStoredPlayers:argv[0]];
 }
+
+DEFINE_ANE_FUNCTION( GC_alert )
+{
+    return [GC_handler alert:argv[0] msg:argv[1]];
+}
+
+DEFINE_ANE_FUNCTION( GC_getSystemLocaleLanguage )
+{
+    return [GC_handler getSystemLocaleLanguage];
+}
+
+DEFINE_ANE_FUNCTION( GC_isBluetoothAvailable)
+{
+    return [GC_handler isBluetoothAvailable];
+}
 //============================add gamecenter match func================================
 DEFINE_ANE_FUNCTION( GC_showMatchMaker )
 {
@@ -121,7 +136,7 @@ DEFINE_ANE_FUNCTION( GC_sendData ) {
 }
 //=============================add local p2p func==================================
 DEFINE_ANE_FUNCTION( LP_requestPeerMatch ) {
-    return [GC_handler requestPeerMatch:argv[0]];
+    return [GC_handler requestPeerMatch:argv[0] sessionMode:argv[1] expectedPlayerCount:argv[2]];
 }
 
 DEFINE_ANE_FUNCTION( LP_joinServer ) {
@@ -139,6 +154,16 @@ DEFINE_ANE_FUNCTION( LP_denyPeer ) {
 void GameCenterContextInitializer( void* extData, const uint8_t* ctxType, FREContext ctx, uint32_t* numFunctionsToSet, const FRENamedFunction** functionsToSet )
 {
     static FRENamedFunction functionMap[] = {
+        //======================add gamecenter match func=====================
+        MAP_FUNCTION( GC_showMatchMaker, NULL ),
+        MAP_FUNCTION( GC_sendData, NULL ),
+        MAP_FUNCTION( GC_sendDataToGCPlayers, NULL),
+        //======================add local p2p connection======================
+        MAP_FUNCTION( LP_requestPeerMatch, NULL ),
+        MAP_FUNCTION( LP_joinServer, NULL ),
+        MAP_FUNCTION( LP_acceptPeer, NULL ),
+        MAP_FUNCTION( LP_denyPeer, NULL ),
+        //======================leaderboard and achievement support=====================
         MAP_FUNCTION( GC_isSupported, NULL ),
         MAP_FUNCTION( GC_authenticateLocalPlayer, NULL ),
         MAP_FUNCTION( GC_getLocalPlayer, NULL ),
@@ -157,15 +182,9 @@ void GameCenterContextInitializer( void* extData, const uint8_t* ctxType, FRECon
         MAP_FUNCTION( GC_getStoredPlayers, NULL ),
         MAP_FUNCTION( GC_getAchievements, NULL ),
         MAP_FUNCTION( GC_getStoredAchievements, NULL ),
-        //======================add gamecenter match func=====================
-        MAP_FUNCTION( GC_showMatchMaker, NULL ),
-        MAP_FUNCTION( GC_sendData, NULL ),
-        MAP_FUNCTION( GC_sendDataToGCPlayers, NULL),
-        //======================add local p2p connection======================
-        MAP_FUNCTION( LP_requestPeerMatch, NULL ),
-        MAP_FUNCTION( LP_joinServer, NULL ),
-        MAP_FUNCTION( LP_acceptPeer, NULL ),
-        MAP_FUNCTION( LP_denyPeer, NULL )
+        MAP_FUNCTION( GC_alert, NULL ),
+        MAP_FUNCTION( GC_isBluetoothAvailable, NULL ),
+        MAP_FUNCTION( GC_getSystemLocaleLanguage, NULL)
     };
     
 	*numFunctionsToSet = sizeof( functionMap ) / sizeof( FRENamedFunction );

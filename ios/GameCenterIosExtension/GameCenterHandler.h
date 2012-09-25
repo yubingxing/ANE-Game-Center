@@ -17,9 +17,6 @@
     BOOL gameCenterAvailable;
     BOOL userAuthenticated;
     
-    GKMatch *match;
-    GKSession *gameSession;
-    BOOL isMatchStarted;
     NSMutableDictionary *playersDict;
     GKInvite *pendingInvite;
     NSArray *pendingPlayersToInvite;
@@ -28,10 +25,15 @@
 @property (assign, readonly) BOOL gameCenterAvailable;
 @property (assign, readonly) BOOL isMatchStarted;
 @property (retain) GKMatch *match;
-@property (retain) GKSession *gameSession;
 @property (retain) NSMutableDictionary *playersDict;
 @property (retain) GKInvite *pendingInvite;
 @property (retain) NSArray *pendingPlayersToInvite;
+
+@property BOOL isHost;
+@property uint32_t expectedPlayerCount;
+@property(retain) __attribute__((NSObject)) NSString *displayName;
+@property(retain) __attribute__((NSObject)) GKMatch *myMatch;
+@property(retain) __attribute__((NSObject)) GKSession *gameSession;
 
 + (GameCenterHandler *)sharedInstance;
 - (id)initWithContext:(FREContext)extensionContext;
@@ -40,7 +42,9 @@
 // Add findMatch function
 - (FREObject) showMatchMaker:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers;
 - (FREObject) sendDataToGCPlayers:(FREObject)playerIds msg:(FREObject)msg;
-
+- (FREObject) alert:(FREObject) title msg:(FREObject)msg;
+- (FREObject) getSystemLocaleLanguage;
+- (FREObject) isBluetoothAvailable;
 - (FREObject) isSupported;
 - (FREObject) authenticateLocalPlayer;
 - (FREObject) getLocalPlayer;
@@ -61,7 +65,7 @@
 - (FREObject) getStoredPlayers:(FREObject)asKey;
 // Add p2p connection func
 - (FREObject) sendData:(FREObject)msg;
-- (FREObject) requestPeerMatch:(FREObject)name;
+- (FREObject) requestPeerMatch:(FREObject)myName sessionMode:(FREObject)sessionMode expectedPlayerCount:(FREObject)expectedPlayerCount;
 - (FREObject) joinServer:(FREObject)peerId;
 - (FREObject) acceptPeer:(FREContext)peerId;
 - (FREObject) denyPeer:(FREContext)peerId;

@@ -1,5 +1,7 @@
 package com.icestar.gamecenter
 {
+	import com.icestar.gamecenter.event.GameCenterEvent;
+	
 	import flash.events.EventDispatcher;
 	import flash.events.StatusEvent;
 	import flash.external.ExtensionContext;
@@ -142,6 +144,18 @@ package com.icestar.gamecenter
 					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.INVITE_RECEIVED));
 					break;
 			}
+		}
+		
+		public static function alert(title:String, msg:String):void {
+			extensionContext.call(NativeMethods.alert, title, msg);
+		}
+		
+		public static function getSystemLocaleLanguage():String {
+			return extensionContext.call(NativeMethods.getSystemLocaleLanguage) as String;
+		}
+		
+		public static function isBluetoothAvailable():Boolean {
+			return extensionContext.call(NativeMethods.isBluetoothAvailable) as Boolean;
 		}
 		
 		/**

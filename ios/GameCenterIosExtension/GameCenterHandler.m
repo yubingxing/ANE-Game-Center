@@ -48,6 +48,18 @@ static GameCenterHandler *_sharedHelper = nil;
     return _sharedHelper;
 }
 
+/**
+ Returns a system language identifier,
+ */
+- (FREObject) getSystemLocaleLanguage {
+    NSString *lan = [[NSLocale preferredLanguages] objectAtIndex:0];
+    
+    FREObject reVal;
+    FRENewObjectFromUTF8((uint32_t)[lan length], (const uint8_t*)[lan UTF8String], &reVal);
+    // [lan release];
+    return reVal;
+};
+
 - (id)initWithContext:(FREContext)extensionContext
 {
     self = [super init];
@@ -787,20 +799,17 @@ static GameCenterHandler *_sharedHelper = nil;
     return nil;
 }
 
-FREObject alert(FREContext ctx,void* funcData, uint32_t argc, FREObject argv[]){
+- (FREObject) alert:(FREObject) title msg:(FREObject)msg {
     //先定义两个变量，用来寄存标题和内容。
-    const uint8_t* title = nil;
-    const uint8_t* msg = nil;
-    uint32_t len = -1;
+    NSString *_title = nil;
+    NSString *_msg = nil;
     
     //使用FREGetObjectAsUTF8，从argv中取出相应的参数值，然后存放到title和msg对应的指针中。
     //这是通过FRE API实现从FREObject中向Native变量赋值的典型形式。
-    FREGetObjectAsUTF8(argv[0], &len, &title);
-    FREGetObjectAsUTF8(argv[1], &len, &msg);
+    GC_FREGetObjectAsString(title, &_title);
+    GC_FREGetObjectAsString(msg, &_msg);
     
-    
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithUTF8String:(const char *)title]
-                                                    message:[NSString stringWithUTF8String:(const char *)msg] delegate:nil
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:_title message:_msg delegate:nil
                                           cancelButtonTitle:@"Cancel"
                                           otherButtonTitles:nil,nil];
     [alert show];
@@ -809,19 +818,37 @@ FREObject alert(FREContext ctx,void* funcData, uint32_t argc, FREObject argv[]){
 }
 
 #pragma mark Add local net p2p connect
-- (FREObject) requestPeerMatch:(FREObject)name {
-    NSString *myName = nil;
 
-    GC_FREGetObjectAsString(name, &myName);
+/**
+ Check whether Bluetooth is available on your device.
+ */
+- (FREObject) isBluetoothAvailable {
+    FREObject reVal;
+    FRENewObjectFromBool(YES,&reVal);
+    return reVal;
+}
+
+- (FREObject) requestPeerMatch:(FREObject)myName sessionMode:(FREObject)sessionMode expectedPlayerCount:(FREObject)expectedPlayerCount{
+    NSString *_myName = nil;
+    uint32_t _sessionMode = 1;
+    uint32_t _expectedPlayerCount = 2;
+
+    GC_FREGetObjectAsString(myName, &_myName);
+    FREGetObjectAsUint32(sessionMode, &_sessionMode);
+    FREGetObjectAsUint32(expectedPlayerCount, &_expectedPlayerCount);
     
-    GKSession* session = [[GKSession alloc] initWithSessionID:nil
-                                                  displayName:myName
-                                                  sessionMode: GKSessionModePeer ];
+
+    self.displayName = _myName;
+    self.expectedPlayerCount = _expectedPlayerCount;
+    
+    GKSession* session = [[GKSession alloc] initWithSessionID:[NSString stringWithFormat:@"com.icestar.treasurehunters_%d@",_expectedPlayerCount]
+                                                  displayName:_myName
+                                                  sessionMode: (_sessionMode == 2) ? GKSessionModeServer : (_sessionMode == 1)? GKSessionModePeer : GKSessionModeClient];
     self.gameSession = session;
     
     [session setDataReceiveHandler:self withContext:nil];
     session.delegate = self;
-    session.available = YES;
+    session.available = YES;  
     
     FREObject reVal;
     FRENewObjectFromUTF8((uint32_t)[session.peerID length], (const uint8_t*)[session.peerID UTF8String], &reVal);
@@ -950,7 +977,30 @@ void handleReceivedData(NSString * peer, NSData * data) {
     datastr = [peer stringByAppendingFormat:@"%@::%@", peer, datastr];
     DISPATCH_STATUS_EVENT(context, (const uint8_t*)[datastr UTF8String], receivedData);
 }
-void handleInvitation() {
-    
+- (void) handleInvitation {
+    [self match].inviteHandler = ^(GKInvite *acceptedInvite, NSArray *playersToInvite) {
+        // Insert application-specific code here to clean up any games in progress.
+        if (acceptedInvite)
+        {
+            GKMatchmakerViewController *mmvc = [[GKMatchmakerViewController alloc] initWithInvite:acceptedInvite];
+            mmvc.matchmakerDelegate = observer;
+            showModalViewController(mmvc);
+            
+            //  observer.isHost = NO;
+        }
+        else if (playersToInvite)
+        {
+            GKMatchRequest *request = [[GKMatchRequest alloc] init];
+            request.minPlayers = 2;
+            request.maxPlayers = 4;
+            request.playersToInvite = playersToInvite;
+            
+            GKMatchmakerViewController *mmvc = [[GKMatchmakerViewController alloc] initWithMatchRequest:request];
+            mmvc.matchmakerDelegate = observer;
+            showModalViewController(mmvc);
+            
+            // observer.isHost = YES;
+        }
+    };
 }
 @end
