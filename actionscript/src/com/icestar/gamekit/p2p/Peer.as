@@ -8,7 +8,6 @@ package com.icestar.gamekit.p2p
 		public var peerID:String;
 		public var displayName:String;
 		
-		
 		public function Peer()
 		{
 			super();

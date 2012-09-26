@@ -3,11 +3,11 @@ package com.icestar.gamekit.gamecenter
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	
-	public class GKMatch extends EventDispatcher
+	public class GCMatch extends EventDispatcher
 	{
-		public var players:Vector.<GKPlayer>;
+		public var players:Vector.<GCPlayer>;
 		
-		public function GKMatch()
+		public function GCMatch()
 		{
 			super();
 		}

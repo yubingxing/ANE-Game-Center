@@ -1,8 +1,6 @@
 package com.icestar.gamekit
 {
-	import com.icestar.gamekit.ConnectionType;
-	import com.icestar.gamekit.Player;
-	import com.icestar.gamekit.gamecenter.GKPlayer;
+	import com.icestar.gamekit.gamecenter.GCPlayer;
 	import com.icestar.gamekit.p2p.Peer;
 	
 	import flash.events.EventDispatcher;
@@ -69,8 +67,8 @@ package com.icestar.gamekit
 			
 			if(pPlayers is Vector.<Player>){
 				players = pPlayers;
-			}else if(pPlayers is Vector.<GKPlayer>){
-				for each(var p:GKPlayer in pPlayers){
+			}else if(pPlayers is Vector.<GCPlayer>){
+				for each(var p:GCPlayer in pPlayers){
 					player = new Player();
 					player.id = p.playerID;
 					player.alias = p.alias;

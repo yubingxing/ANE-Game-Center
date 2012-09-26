@@ -1,6 +1,13 @@
 package com.icestar.gamekit
 {
 	import com.icestar.gamekit.event.GameCenterEvent;
+	import com.icestar.gamekit.event.GameKitEvent;
+	import com.icestar.gamekit.event.PeerSessionEvent;
+	import com.icestar.gamekit.gamecenter.GCMatch;
+	import com.icestar.gamekit.gamecenter.GCPlayer;
+	import com.icestar.gamekit.interfaces.IGameDelegate;
+	import com.icestar.gamekit.p2p.Peer;
+	import com.icestar.gamekit.p2p.Session;
 	import com.icestar.gamekit.p2p.SessionMode;
 	
 	import flash.events.EventDispatcher;
@@ -13,13 +20,24 @@ package com.icestar.gamekit
 		private static const dispatcher:EventDispatcher = new EventDispatcher;
 		
 		public static var isAuthenticating : Boolean;
+		public static var match:Match;
+		public static var delegate:IGameDelegate;
+		
+		private static var _expectedPlayerCount:int = 2;
+		private static var _curConnectionType:int = ConnectionType.LOCAL;
 		
 		private static var _isSupported : Boolean;
 		private static var _isSupportedTested : Boolean;
 		private static var _isAuthenticated : Boolean;
 		private static var _isAuthenticatedTested : Boolean;
 		
-		private static var _localPlayer : GCLocalPlayer;
+		private static var _gcMatch:GCMatch;
+		private static var _gcLocalPlayer:GCPlayer;
+		
+		private static var _session:Session;
+		private static var _p2pLocalPlayer:Peer;
+		
+		private static var _localPlayer : Player;
 		private static var _localPlayerTested : Boolean;
 		
 		private static var extensionContext : ExtensionContext = null;
@@ -63,6 +81,23 @@ package com.icestar.gamekit
 			//trace( "internal event", event.level );
 			switch( event.level )
 			{
+				//==================PeerSessionEvent=================
+				case PeerSessionEvent.RECEIVED_CLIENT_REQUEST:
+					break;
+				//==================GameKitEvent==================
+				case GameKitEvent.RECEIVED_DATA_FROM:
+					break;
+				case GameKitEvent.CONNECTION_FAILED:
+					break;
+				case GameKitEvent.MATCH_PLAYERS_INITIALIZED:
+					break;
+				case GameKitEvent.PLAYER_AVAILABILITY_CHANGED:
+					break;
+				case GameKitEvent.PLAYER_STATUS_CHANGED:
+					break;
+				case GameKitEvent.REQUEST_MATCH_COMPLETE:
+					break;
+				//==================GameCenterEvent=================
 				case GameCenterEvent.LOCALPLAYER_AUTHENTICATED :
 					isAuthenticating = false;
 					_isAuthenticated = true;
@@ -209,12 +244,12 @@ package com.icestar.gamekit
 		/**
 		 * Authenticate the local player
 		 */
-		public static function get localPlayer() : GCLocalPlayer
+		public static function get localPlayer() : Player
 		{
 			assertIsAuthenticatedTested();
 			if( _isAuthenticated && !_localPlayerTested )
 			{
-				_localPlayer = extensionContext.call( NativeMethods.getLocalPlayer ) as GCLocalPlayer;
+				_localPlayer = extensionContext.call( NativeMethods.getLocalPlayer ) as Player;
 			}
 			return _localPlayer;
 		}
