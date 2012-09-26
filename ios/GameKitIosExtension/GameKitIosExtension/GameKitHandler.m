@@ -42,9 +42,12 @@
 @synthesize pendingInvite;
 @synthesize pendingPlayersToInvite;
 @synthesize match;
+@synthesize expectedPlayerCount;
+@synthesize isHost;
 
 static FREContext context;
-static GameKitHandler *_sharedHelper = nil;
+static GameKitHandler * _sharedHelper = nil;
+static NSString * appId;
 + (GameKitHandler *) sharedInstance {
     return _sharedHelper;
 }
@@ -64,6 +67,7 @@ static GameKitHandler *_sharedHelper = nil;
 - (id)initWithContext:(FREContext)extensionContext
 {
     self = [super init];
+    appId = [[NSBundle mainBundle] bundleIdentifier];
     _sharedHelper = self;
     if( self )
     {
@@ -145,7 +149,7 @@ static GameKitHandler *_sharedHelper = nil;
                 {
                     userAuthenticated = YES;
                     DISPATCH_STATUS_EVENT( context, [localPlayer JSONString], localPlayerAuthenticated );
-                    handleInvitation();
+                    [self handleInvitation];
                 }
                 else
                 {
@@ -757,35 +761,16 @@ static GameKitHandler *_sharedHelper = nil;
     };
 }
 
-- (void)matchEnded {
+- (void) matchEnded {
     NSLog(@"Match ended");
     [self.match disconnect];
     self.match = nil;
     DISPATCH_STATUS_EVENT(context, (const uint8_t *)"", MatchEnded);
 }
 
-- (FREObject)sendData:(FREObject)msg {
-    NSError *error;
-    NSString *tmp = nil;
-
-    GC_FREGetObjectAsString(msg, &tmp);
-    NSData *data = [tmp JSONData];
-
-//    if([data isKindOfClass:[NSArray class]]){
-//        str = [(NSArray *)data JSONString];
-//    } else if ([data isKindOfClass:[NSDictionary class]]) {
-//        str = [(NSDictionary *)data JSONString];
-//    } else if ([data isKindOfClass:[NSString class]]) {
-//        str = [(NSString *)data JSONString];
-//    }
-    BOOL success = [self.match sendDataToAllPlayers:data withDataMode:GKMatchSendDataReliable error:&error];
-    if (!success) {
-        NSLog(@"Error sending init packet");
-        [self matchEnded];
-    }
-    return nil;
-}
-
+/**
+ Broadcast a message to selected Game Center match players.
+ */
 - (FREObject) sendDataToGCPlayers:(FREObject)playerIds msg:(FREObject)msg {
     //创建msg来寄存发送的信息
     const uint8_t* _msg = nil;
@@ -806,6 +791,74 @@ static GameKitHandler *_sharedHelper = nil;
     NSData *packet = [NSData dataWithBytes:datachar length:strlen(datachar)];
     //使用GKMatch的sendData方法将信息发送给指定的玩家们
     [self.match sendData:packet toPlayers:players withDataMode:GKSendDataUnreliable error:nil];
+    return nil;
+}
+
+/**
+ Boardcast a message to all Session peers.
+ */
+- (FREObject) sendDataToPeers:(FREObject) playerIds msg:(FREObject) msg {
+    const uint8_t* _msg = nil;
+    uint32_t len = -1;
+    
+    FREGetObjectAsUTF8(msg, &len, &_msg);
+    const char* datachar = (const char*) _msg;
+        
+    NSString *playerIDStr = nil;
+    GC_FREGetObjectAsString(playerIds, &playerIDStr);
+
+    NSArray *players = [playerIDStr componentsSeparatedByString:@","];
+    //[playerIDStr release];
+    
+    NSError *error;
+    NSData *packet = [NSData dataWithBytes:datachar length:strlen(datachar)];
+    [self.gameSession sendData:packet toPeers:players withDataMode:GKSendDataUnreliable error:&error];
+    
+//    NSLog([NSString stringWithUTF8String:(const char*)_msg]);
+    return nil;
+}
+/**
+ Disconnect from Game Center Match;
+ */
+- (FREObject) disconnectFromGCMatch {
+    if(self.match!=nil){
+        [self.match disconnect];
+        //[observer.myMatch release];
+    }
+    return nil;
+}
+/**
+ Disconnect from certain session peer;
+ */
+- (FREObject) disconnectFromPeer:(FREObject) peerId {
+    NSString *peerID = nil;
+    GC_FREGetObjectAsString(peerId, &peerID);
+    if([self gameSession]!=nil){
+        [[self gameSession] disconnectPeerFromAllPeers:peerID];
+    }
+    return nil;
+}
+
+/**
+ Disconnect from all other session peers;
+ */
+- (FREObject) disconnectFromAllPeers {
+    if([self gameSession]!=nil){
+        [[self gameSession] disconnectFromAllPeers];
+        [self gameSession].available = NO;
+        [[self gameSession] setDataReceiveHandler: nil withContext: nil];
+        [self gameSession].delegate = nil;
+        // [[observer gameSession] release];
+    }
+    return nil;
+}
+/**
+ While entering match, you need to lock the session so nobody will search this session.
+ */
+- (FREObject) lockSession {
+    if([self gameSession]!=nil){
+        [self gameSession].available = NO;
+    }
     return nil;
 }
 
@@ -852,20 +905,24 @@ void initializeSessionPlayers(GKSession *session, NSArray *peers){
     return reVal;
 }
 
-- (FREObject) requestPeerMatch:(FREObject)myName sessionMode:(FREObject)sessionMode expectedPlayerCount:(FREObject)expectedPlayerCount{
+/**
+ Request a peer session, difference from server mode and client mode.
+ */
+- (FREObject) requestPeerMatch:(FREObject)myName sessionMode:(FREObject)sessionMode expectedPlayerCount:(FREObject)playerCount{
     NSString *_myName = nil;
     uint32_t _sessionMode = 1;
     uint32_t _expectedPlayerCount = 2;
 
     GC_FREGetObjectAsString(myName, &_myName);
+    FREGetObjectAsUint32(playerCount, &_expectedPlayerCount);
     FREGetObjectAsUint32(sessionMode, &_sessionMode);
-    FREGetObjectAsUint32(expectedPlayerCount, &_expectedPlayerCount);
+
     
 
     self.displayName = _myName;
     self.expectedPlayerCount = _expectedPlayerCount;
     
-    GKSession* session = [[GKSession alloc] initWithSessionID:[NSString stringWithFormat:@"com.icestar.treasurehunters_%d@",_expectedPlayerCount]
+    GKSession* session = [[GKSession alloc] initWithSessionID:[NSString stringWithFormat:@"%@_%d@", appId, _expectedPlayerCount]
                                                   displayName:_myName
                                                   sessionMode: (_sessionMode == 2) ? GKSessionModeServer : (_sessionMode == 1)? GKSessionModePeer : GKSessionModeClient];
     self.gameSession = session;
@@ -879,16 +936,9 @@ void initializeSessionPlayers(GKSession *session, NSArray *peers){
     return reVal;
 }
 
-- (FREObject) joinServer:(FREObject)peerId {
-    NSString *peerID = nil;
-    GC_FREGetObjectAsString(peerId, &peerID);
-    
-    uint32_t timeInterval = 10000;
-    
-    [self.gameSession connectToPeer:peerID withTimeout:timeInterval];
-    return nil;
-}
-
+/**
+ Accepts a connecting client as a server.
+ */
 - (FREObject) acceptPeer:(FREContext)peerId {
     NSString *peerID = nil;
     GC_FREGetObjectAsString(peerId, &peerID);
@@ -898,13 +948,27 @@ void initializeSessionPlayers(GKSession *session, NSArray *peers){
     return nil;
 }
 
+/**
+ Rejects a connecting client as a server.
+ */
 - (FREObject) denyPeer:(FREContext)peerId {
     NSString *peerID = nil;
     GC_FREGetObjectAsString(peerId, &peerID);
     
-    uint32_t timeInterval = 10000;
+    [self.gameSession denyConnectionFromPeer:peerID];
+    return nil;
+}
 
-    [self.gameSession denyConnectionFromPeer:peerID withTimeout:timeInterval];
+/**
+ Trying to connect a server as a client.
+ */
+- (FREObject) joinServer:(FREObject)peerId {
+    NSString *peerID = nil;
+    GC_FREGetObjectAsString(peerId, &peerID);
+    
+    uint32_t timeInterval = 10000;
+    
+    [self.gameSession connectToPeer:peerID withTimeout:timeInterval];
     return nil;
 }
 

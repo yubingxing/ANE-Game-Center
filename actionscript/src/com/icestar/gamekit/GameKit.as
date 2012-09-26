@@ -1,6 +1,7 @@
 package com.icestar.gamekit
 {
 	import com.icestar.gamekit.event.GameCenterEvent;
+	import com.icestar.gamekit.p2p.SessionMode;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.StatusEvent;
@@ -133,15 +134,6 @@ package com.icestar.gamekit
 					break;
 				case GameCenterEvent.LOAD_ACHIEVEMENTS_FAILED :
 					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_ACHIEVEMENTS_FAILED));
-					break;
-				case GameCenterEvent.MATCH_STARTED:
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.MATCH_STARTED));
-					break;
-				case GameCenterEvent.MATCH_ENDED:
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.MATCH_ENDED));
-					break;
-				case GameCenterEvent.INVITE_RECEIVED:
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.INVITE_RECEIVED));
 					break;
 			}
 		}
@@ -347,12 +339,16 @@ package com.icestar.gamekit
 			extensionContext.call( NativeMethods.showMatchMaker, minPlayers, maxPlayers);
 		}
 		
-		public static function sendData(data:String):void {
-			extensionContext.call( NativeMethods.sendData, data);
+		public static function sendDataToGCPlayers(playerIds:String, msg:String):void {
+			extensionContext.call( NativeMethods.sendDataToGCPlayers, playerIds, msg);
 		}
 		
-		public static function requestPeerMatch(name:String):void {
-			extensionContext.call( NativeMethods.requestPeerMatch, name);
+		public static function disconnectFromGCMatch():void {
+			extensionContext.call( NativeMethods.disconnectFromGCMatch);
+		}
+		
+		public static function requestPeerMatch(myName:String, sessionMode:int=SessionMode.PEER, expectedPlayerCount:int=2):String {
+			return extensionContext.call( NativeMethods.requestPeerMatch, myName, sessionMode, expectedPlayerCount) as String;
 		}
 		
 		public static function joinServer(peerId:String):void {

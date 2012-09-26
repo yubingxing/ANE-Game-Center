@@ -131,9 +131,10 @@ DEFINE_ANE_FUNCTION( GC_sendDataToGCPlayers ) {
     return [GC_handler sendDataToGCPlayers:argv[0] msg:argv[1]];
 }
 
-DEFINE_ANE_FUNCTION( GC_sendData ) {
-    return [GC_handler sendData:argv[0]];
+DEFINE_ANE_FUNCTION( GC_disconnectFromGCMatch ) {
+    return [GC_handler disconnectFromGCMatch];
 }
+
 //=============================add local p2p func==================================
 DEFINE_ANE_FUNCTION( LP_requestPeerMatch ) {
     return [GC_handler requestPeerMatch:argv[0] sessionMode:argv[1] expectedPlayerCount:argv[2]];
@@ -151,18 +152,38 @@ DEFINE_ANE_FUNCTION( LP_denyPeer ) {
     return [GC_handler denyPeer:argv[0]];
 }
 
+DEFINE_ANE_FUNCTION( LP_sendDataToPeers) {
+    return [GC_handler sendDataToPeers:argv[0] msg:argv[1]];
+}
+
+DEFINE_ANE_FUNCTION( LP_lockSession ) {
+    return [GC_handler lockSession];
+}
+
+DEFINE_ANE_FUNCTION( LP_disconnectFromAllPeers ) {
+    return [GC_handler disconnectFromAllPeers];
+}
+
+DEFINE_ANE_FUNCTION( LP_disconnectFromPeer ) {
+    return [GC_handler disconnectFromPeer:argv[0]];
+}
+
 void GameKitContextInitializer( void* extData, const uint8_t* ctxType, FREContext ctx, uint32_t* numFunctionsToSet, const FRENamedFunction** functionsToSet )
 {
     static FRENamedFunction functionMap[] = {
         //======================add GameKit match func=====================
         MAP_FUNCTION( GC_showMatchMaker, NULL ),
-        MAP_FUNCTION( GC_sendData, NULL ),
-        MAP_FUNCTION( GC_sendDataToGCPlayers, NULL),
+        MAP_FUNCTION( GC_sendDataToGCPlayers, NULL ),
+        MAP_FUNCTION( GC_disconnectFromGCMatch, NULL ),
         //======================add local p2p connection======================
         MAP_FUNCTION( LP_requestPeerMatch, NULL ),
         MAP_FUNCTION( LP_joinServer, NULL ),
         MAP_FUNCTION( LP_acceptPeer, NULL ),
         MAP_FUNCTION( LP_denyPeer, NULL ),
+        MAP_FUNCTION( LP_sendDataToPeers, NULL ),
+        MAP_FUNCTION( LP_lockSession, NULL ),
+        MAP_FUNCTION( LP_disconnectFromAllPeers, NULL ),
+        MAP_FUNCTION( LP_disconnectFromPeer, NULL ),
         //======================leaderboard and achievement support=====================
         MAP_FUNCTION( GC_isSupported, NULL ),
         MAP_FUNCTION( GC_authenticateLocalPlayer, NULL ),
@@ -184,7 +205,7 @@ void GameKitContextInitializer( void* extData, const uint8_t* ctxType, FREContex
         MAP_FUNCTION( GC_getStoredAchievements, NULL ),
         MAP_FUNCTION( GC_alert, NULL ),
         MAP_FUNCTION( GC_isBluetoothAvailable, NULL ),
-        MAP_FUNCTION( GC_getSystemLocaleLanguage, NULL)
+        MAP_FUNCTION( GC_getSystemLocaleLanguage, NULL )
     };
     
 	*numFunctionsToSet = sizeof( functionMap ) / sizeof( FRENamedFunction );

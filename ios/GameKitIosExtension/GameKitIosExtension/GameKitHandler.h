@@ -38,10 +38,13 @@ void handleReceivedData(NSString * peer, NSData * data);
 + (GameKitHandler *)sharedInstance;
 - (id)initWithContext:(FREContext)extensionContext;
 - (void)lookupPlayers;
+- (void) handleInvitation;
 
 // Add findMatch function
 - (FREObject) showMatchMaker:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers;
 - (FREObject) sendDataToGCPlayers:(FREObject)playerIds msg:(FREObject)msg;
+- (FREObject) disconnectFromGCMatch;
+// Add report scores and show achievement and show leaderboard
 - (FREObject) alert:(FREObject) title msg:(FREObject)msg;
 - (FREObject) getSystemLocaleLanguage;
 - (FREObject) isBluetoothAvailable;
@@ -64,9 +67,12 @@ void handleReceivedData(NSString * peer, NSData * data);
 - (FREObject) getStoredAchievements:(FREObject)asKey;
 - (FREObject) getStoredPlayers:(FREObject)asKey;
 // Add p2p connection func
-- (FREObject) sendData:(FREObject)msg;
 - (FREObject) requestPeerMatch:(FREObject)myName sessionMode:(FREObject)sessionMode expectedPlayerCount:(FREObject)expectedPlayerCount;
 - (FREObject) joinServer:(FREObject)peerId;
 - (FREObject) acceptPeer:(FREContext)peerId;
 - (FREObject) denyPeer:(FREContext)peerId;
+- (FREObject) sendDataToPeers:(FREObject) playerIds msg:(FREObject) msg;
+- (FREObject) lockSession;
+- (FREObject) disconnectFromAllPeers;
+- (FREObject) disconnectFromPeer:(FREObject) peerId;
 @end
