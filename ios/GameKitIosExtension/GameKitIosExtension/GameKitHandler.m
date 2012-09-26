@@ -21,6 +21,12 @@
 #define ASLeaderboard "com.icestar.gamekit.GCLeaderboard"
 #define ASVectorScore "Vector.<com.icestar.gamekit.GCScore>"
 #define ASVectorAchievement "Vector.<com.icestar.gamekit.GCAchievement>"
+// connection status
+#define AVAILABLE 1
+#define CONNECTING 2
+#define CONNECTED 3
+#define DISCONNECTED 4
+#define UNAVAILABLE 5
 
 @interface GameKitHandler () {
     GKPeerPickerController *picker;
@@ -647,33 +653,6 @@ static NSString * appId;
 
 #pragma mark User functions
 
-- (void)lookupPlayers {
-    
-    NSLog(@"Looking up %d players...", match.playerIDs.count);
-    [GKPlayer loadPlayersForIdentifiers:match.playerIDs withCompletionHandler:^(NSArray *players, NSError *error) {
-        
-        if (error != nil) {
-            NSLog(@"Error retrieving player info: %@", error.localizedDescription);
-            isMatchStarted = NO;
-            [self matchEnded];
-        } else {
-            
-            // Populate players dict
-            self.playersDict = [NSMutableDictionary dictionaryWithCapacity:players.count];
-            for (GKPlayer *player in players) {
-                NSLog(@"Found player: %@", player.alias);
-                [playersDict setObject:player forKey:player.playerID];
-            }
-            
-            // Notify delegate match can begin
-            isMatchStarted = YES;
-            DISPATCH_STATUS_EVENT(context, (const uint8_t *)"", MatchStarted);
-            
-        }
-    }];
-    
-}
-
 // start match maker request and show the matchmaker view
 - (FREObject)showMatchMaker:(FREObject)minPlayers maxPlayers:(FREObject)maxPlayers {
     
@@ -704,26 +683,28 @@ static NSString * appId;
 - (void)match:(GKMatch *)theMatch player:(NSString *)playerID didChangeState:(GKPlayerConnectionState)state {
     
     if (match != theMatch) return;
+    NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"{"];
+    [retXML appendFormat:@"\"id\":\"%@\"",playerID];
     
-    switch (state) {
+    switch (state)
+    {
         case GKPlayerStateConnected:
             // handle a new player connection.
-            NSLog(@"Player connected!");
-            
-            if (!isMatchStarted && theMatch.expectedPlayerCount == 0) {
-                NSLog(@"Ready to start match!");
-                [self lookupPlayers];
-            }
-            
+            [retXML appendFormat:@"\"status\":%d", CONNECTED];
             break;
         case GKPlayerStateDisconnected:
-            // a player just disconnected.
-            NSLog(@"Player disconnected!");
+            [retXML appendFormat:@"\"status\":%d", DISCONNECTED];
             isMatchStarted = NO;
-            [self matchEnded];
+            // a player just disconnected.
             break;
     }
     
+    DISPATCH_STATUS_EVENT(context, (const uint8_t *)[retXML UTF8String], player_status_changed);
+    
+    if (!isMatchStarted && match.expectedPlayerCount == 0)
+    {
+        [self initializeMatchPlayers];
+    }
 }
 
 // The match was unable to connect with the player due to an error.
@@ -733,7 +714,8 @@ static NSString * appId;
     
     NSLog(@"Failed to connect to player with error: %@", error.localizedDescription);
     isMatchStarted = NO;
-    [self matchEnded];
+    NSString *ret = [playerID stringByAppendingFormat:@"::%@", [error description]];
+    DISPATCH_STATUS_EVENT(context, (const uint8_t *)[ret UTF8String], connection_failed );
 }
 
 // The match was unable to be established with any players due to an error.
@@ -743,7 +725,7 @@ static NSString * appId;
     
     NSLog(@"Match failed with error: %@", error.localizedDescription);
     isMatchStarted = NO;
-    [self matchEnded];
+    DISPATCH_STATUS_EVENT(context, (const uint8_t *)[[error description] UTF8String], connection_failed );
 }
 
 // This method is called when the match is interrupted; if it returns YES, a new invite will be sent to attempt reconnection. This is supported only for 1v1 games
@@ -759,13 +741,6 @@ static NSString * appId;
         [self createBoardsController];
         [self.boardsController displayMatchMaker:2 max:4];
     };
-}
-
-- (void) matchEnded {
-    NSLog(@"Match ended");
-    [self.match disconnect];
-    self.match = nil;
-    DISPATCH_STATUS_EVENT(context, (const uint8_t *)"", MatchEnded);
 }
 
 /**
@@ -881,6 +856,7 @@ static NSString * appId;
 }
 
 -(void) initializeMatchPlayers {
+    isMatchStarted = YES;
     [GKPlayer loadPlayersForIdentifiers:[self.match playerIDs] withCompletionHandler:^(NSArray *players, NSError *error) { 
         if(error){
             //Handler load player info error;
@@ -892,7 +868,7 @@ static NSString * appId;
 
 #pragma mark Add local net p2p connect
 
-void initializeSessionPlayers(GKSession *session, NSArray *peers){
+- (void) initializeSessionPlayers:(GKSession *) session peers:(NSArray *) peers {
     DISPATCH_STATUS_EVENT(context, getPeersString(peers, session), matchPlayersInitialized);
 }
 
@@ -982,21 +958,40 @@ void initializeSessionPlayers(GKSession *session, NSArray *peers){
 
 
 #pragma mark GKSessionDelegate
-
 /* Indicates a state change for the given peer.
  */
 - (void)session:(GKSession *)session peer:(NSString *)peerID didChangeState:(GKPeerConnectionState)state {
-    BOOL available = FALSE;
+    int status = 0;
     switch (state)
     {
         case GKPeerStateAvailable:
-            available = TRUE;
+            status = AVAILABLE;
+            break;
+        case GKPeerStateConnecting:
+            status = CONNECTING;
+            break;
+        case GKPeerStateConnected:
+            status = CONNECTED;
+            if([session sessionMode] == GKSessionModePeer){
+                // NSLog(@"2");
+                NSArray *connectedPeers = [session peersWithConnectionState:GKPeerStateConnected];
+                if([connectedPeers count] == expectedPlayerCount-1){
+                    // NSLog(@"3");
+                    [self initializeSessionPlayers:session peers:connectedPeers];
+                }
+            }
+            break;
+        case GKPeerStateDisconnected:
+            status = DISCONNECTED;
+            break;
+        case GKPeerStateUnavailable:
+            status = UNAVAILABLE;
             break;
         default:
             break;
     }
 
-    DISPATCH_STATUS_EVENT(context, getPlayerString(peerID, [session displayNameForPeer:peerID], available), playerStatusChanged);
+    DISPATCH_STATUS_EVENT(context, getPlayerString(peerID, [session displayNameForPeer:peerID], status, nil), player_status_changed);
 
 }
 
@@ -1006,19 +1001,19 @@ void initializeSessionPlayers(GKSession *session, NSArray *peers){
  Deny by calling -denyConnectionFromPeer:
  */
 - (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID {
-    DISPATCH_STATUS_EVENT(context, getPlayerString(peerID, [session displayNameForPeer:peerID], FALSE), receivedClientRequest);
+    DISPATCH_STATUS_EVENT(context, getPlayerString(peerID, [session displayNameForPeer:peerID], 0, nil), received_client_request);
 }
 
 /* Indicates a connection error occurred with a peer, which includes connection request failures, or disconnects due to timeouts.
  */
 - (void)session:(GKSession *)session connectionWithPeerFailed:(NSString *)peerID withError:(NSError *)error {
-    
+    DISPATCH_STATUS_EVENT(context, getPlayerString(peerID, [session displayNameForPeer:peerID], 0, error), connection_failed);
 }
 
 /* Indicates an error occurred with the session such as failing to make available.
  */
 - (void)session:(GKSession *)session didFailWithError:(NSError *)error {
-    
+    DISPATCH_STATUS_EVENT(context, getPlayerString([session peerID], [session displayNameForPeer:session.peerID], 0, error), connection_failed);
 }
 
 #pragma mark GKPeerPickerControllerDelegate

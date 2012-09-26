@@ -12,11 +12,13 @@
 #define ASScore "com.icestar.gameCenter.GCScore"
 #define ASAchievement "com.icestar.gameCenter.GCAchievement"
 
-const uint8_t * getPlayerString (NSString *pid, NSString *alias, BOOL available) {
+const uint8_t * getPlayerString (NSString *pid, NSString *alias, int status, NSError *error) {
     NSMutableString* retXML = [[NSMutableString alloc] initWithString:@"{"];
     [retXML appendFormat:@"\"id\":\"%@\",\"alias\":\"%@\"", pid, alias];
-    if(available)
-        [retXML appendFormat:@",\"available\":1"];
+    if(status > 0 )
+        [retXML appendFormat:@",\"status\":%d", status];
+    if(error && error != nil)
+        [retXML appendFormat:@",\"error\":\"%@\"", [error description]];
     [retXML appendFormat:@"}"];
     return (const uint8_t *)[retXML UTF8String];
 }
@@ -245,7 +247,7 @@ const uint8_t * getPeersString (NSArray *peers, GKSession *session) {
 @implementation GKPlayer(JSONKitSerializing)
 
 - (const uint8_t *)JSONString {
-    return getPlayerString(self.playerID, self.alias, FALSE);
+    return getPlayerString(self.playerID, self.alias, 0, nil);
 }
 
 @end

@@ -37,7 +37,8 @@ void handleReceivedData(NSString * peer, NSData * data);
 
 + (GameKitHandler *)sharedInstance;
 - (id)initWithContext:(FREContext)extensionContext;
-- (void)lookupPlayers;
+- (void) initializeMatchPlayers;
+- (void) initializeSessionPlayers:(GKSession *) session peers:(NSArray *) peers;
 - (void) handleInvitation;
 
 // Add findMatch function

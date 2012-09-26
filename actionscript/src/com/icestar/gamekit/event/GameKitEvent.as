@@ -4,6 +4,7 @@ package com.icestar.gamekit.event
 	
 	public class GameKitEvent extends Event
 	{
+		public static const CONNECTION_FAILED:String = "connection_failed";
 		public static const PLAYER_STATUS_CHANGED:String = "player_status_changed";
 		public static const PLAYER_AVAILABILITY_CHANGED:String = "player_availability_changed";
 		

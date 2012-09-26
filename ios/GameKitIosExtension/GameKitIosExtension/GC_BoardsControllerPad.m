@@ -35,13 +35,13 @@
 - (void)leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController
 {
     [win.rootViewController dismissModalViewControllerAnimated:YES];
-    FREDispatchStatusEventAsync(context, (const uint8_t *)"", gameCenterViewRemoved);
+    FREDispatchStatusEventAsync(context, gameCenterViewRemoved, (const uint8_t *)"");
 }
 
 - (void)achievementViewControllerDidFinish:(GKLeaderboardViewController *)viewController
 {
     [win.rootViewController dismissModalViewControllerAnimated:YES];
-    FREDispatchStatusEventAsync(context, (const uint8_t *)"", gameCenterViewRemoved);
+    FREDispatchStatusEventAsync(context, gameCenterViewRemoved, (const uint8_t *)"");
 }
 
 -(void) displayLeaderboard
@@ -126,14 +126,14 @@
 - (void)matchmakerViewControllerWasCancelled:(GKMatchmakerViewController *)viewController
 {
     [win.rootViewController dismissModalViewControllerAnimated:YES];
-    FREDispatchStatusEventAsync(context, (const uint8_t *)"", gameCenterViewRemoved);
-
+    FREDispatchStatusEventAsync(context, request_match_cancelled, (const uint8_t*)"");
 }
 
 // Matchmaking has failed with an error
 - (void)matchmakerViewController:(GKMatchmakerViewController *)viewController didFailWithError:(NSError *)error
 {
     [win.rootViewController dismissModalViewControllerAnimated:YES];
+    FREDispatchStatusEventAsync(context, request_match_failed, (const uint8_t*)"");
     NSLog(@"Error finding match: %@", error.localizedDescription);
 }
 
@@ -144,9 +144,11 @@
     GameKitHandler *gc = [GameKitHandler sharedInstance];
     gc.match = theMatch;
     theMatch.delegate = gc;
+    
+    FREDispatchStatusEventAsync(context, request_match_complete, (const uint8_t*)"");
     if (!gc.isMatchStarted && theMatch.expectedPlayerCount == 0) {
         NSLog(@"Ready to start match!");
-        [gc lookupPlayers];
+        [gc initializeMatchPlayers];
     }
 }
 

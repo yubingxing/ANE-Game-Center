@@ -10,6 +10,7 @@ FlashRuntimeExtensions.h
 # Eclipse FDT
 .settings/*
 .project
+.svn
 
 # Xcode
 xcuserdata

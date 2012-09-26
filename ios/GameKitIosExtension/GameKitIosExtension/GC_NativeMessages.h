@@ -25,14 +25,14 @@
 #define loadLeaderboardFailed "LoadLeaderboardFailed"
 #define loadAchievementsComplete "LoadAchievementsComplete"
 #define loadAchievementsFailed "LoadAchievementsFailed"
-//==============add gamecenter match func======================
-#define MatchStarted "MatchStarted"
-#define MatchEnded "MatchEnded"
-#define InviteReceived "InviteReceived"
-//==============add local p2p connection================
-#define playerStatusChanged "playerStatusChanged"
-#define receivedClientRequest "receivedClientRequest"
+//================gamecenter and p2p====================
+#define player_status_changed "player_status_changed"
+#define connection_failed "connection_failed"
+#define received_client_request "received_client_request"
 
 #define received_data_from "received_data_from"
 #define matchPlayersInitialized "matchPlayersInitialized"
+#define request_match_cancelled "request_match_cancelled"
+#define request_match_failed "request_match_failed"
+#define request_match_complete "request_match_complete"
 #endif

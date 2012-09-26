@@ -10,7 +10,7 @@
 #import <GameKit/GameKit.h>
 #import "FlashRuntimeExtensions.h"
 
-const uint8_t * getPlayerString (NSString *id, NSString *alias, BOOL available);
+const uint8_t * getPlayerString (NSString *pid, NSString *alias, int status, NSError *error);
 const uint8_t * getPlayersString (NSArray *players);
 const uint8_t * getPeersString (NSArray *peers, GKSession *session);
 
