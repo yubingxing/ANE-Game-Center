@@ -1,5 +1,7 @@
 package com.icestar.gamekit
 {
+	import com.icestar.gamekit.gamecenter.GCPlayer;
+
 	public class GCScore
 	{
 		public var category : String;

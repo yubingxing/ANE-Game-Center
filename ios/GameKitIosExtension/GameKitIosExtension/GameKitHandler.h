@@ -33,7 +33,7 @@
 @property uint32_t expectedPlayerCount;
 
 void receiveFromPeer(NSData *data, NSString *peer, GKSession *session, void *context);
-void handleReceivedData(NSString * peer, NSData * data);
+void handleReceivedData(NSData * data);
 
 + (GameKitHandler *)sharedInstance;
 - (id)initWithContext:(FREContext)extensionContext;

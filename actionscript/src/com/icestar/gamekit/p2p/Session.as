@@ -10,16 +10,12 @@ package com.icestar.gamekit.p2p
 		public var detectedServers:Vector.<Peer>;
 
 		
-		public function Session(id:String="")
-		{
+		public function Session(id:String="") {
 			super();
 			
 			peers = new Vector.<Peer>;
 			detectedServers = new Vector.<Peer>;
 		}
-		
-		
-		
 		
 		public function addPeer(peer:Peer):void{
 			if(!hasPeer(peer)){

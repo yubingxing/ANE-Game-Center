@@ -4,10 +4,12 @@ package com.icestar.gamekit.interfaces
 	import com.icestar.gamekit.Player;
 	import com.icestar.gamekit.p2p.Peer;
 	
-
-
-	public interface IGameDelegate
-	{
+	/**
+	 * GameCenter and P2P game delegate interface
+	 * @author letang
+	 * 
+	 */
+	public interface IGameDelegate {
 		function get isGameCenterSupported():Boolean;
 		function get isP2PSupported():Boolean;
 		function get isAuthenticated():Boolean;

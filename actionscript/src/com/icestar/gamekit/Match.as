@@ -19,15 +19,12 @@ package com.icestar.gamekit
 		{
 		}
 		
-		public function initializePlayers(playerXML:XMLList,localPlayer:Player):void{
+		public function initializePlayers(players:Array,localPlayer:Player):void{
 			players = new Vector.<Player>;
 			
-			var resortArray:Array = new Array(localPlayer);
-			for(var i:int=0;i<playerXML.children().length();i++){
-				var p:Player = new Player();
-				p.id = playerXML.child(i).i;
-				p.alias = playerXML.child(i).a;
-				resortArray.push(p);
+			var resortArray:Array = [localPlayer];
+			for each(var p:Object in players){
+				resortArray.push(p as Player);
 			}
 			if(connectionType == ConnectionType.GAME_CENTER){
 				resortArray.sortOn("id",Array.CASEINSENSITIVE);
@@ -42,8 +39,8 @@ package com.icestar.gamekit
 			hostPlayerID = players[0].id;
 			
 			randomSortPlayers();
-			
 		}
+		
 		private function randomSortPlayers():void{
 			var tmpPlayers:Vector.<Player> = new Vector.<Player>;
 			var len:int = players.length;
@@ -87,7 +84,6 @@ package com.icestar.gamekit
 			if(connectionType == ConnectionType.GAME_CENTER){
 				hostPlayerID = players[0].id;
 			}
-			
 		}
 		
 		public function getOtherPlayerIDs(exceptPlayerID:String=""):Vector.<String>{
@@ -100,28 +96,16 @@ package com.icestar.gamekit
 			return ids;
 		}
 		
-		public function generatePlayerXML():XMLList{
-			var xmllist:XMLList = new XMLList("<p></p>");
-			for(var i:int=0;i<players.length;i++){
-				var p:Player = players[i];
-				xmllist.appendChild("<p><i>"+p.id+"</i><a>"+p.alias+"</a></p>");
-			}
-			return xmllist;
-		}
-		public function extractPlayersFromXML(xml:XMLList):Vector.<Player>{
-			var pls:Vector.<Player> = new Vector.<Player>;;
-			
-			for(var i:int=0;i<xml.children().length();i++){
-				if(xml.child(i).name()=="p"){
-					var player:Player = new Player();
-					player.id = xml.child(i).i;
-					player.alias = xml.child(i).a;
-					pls.push(player);
-					//trace(player.alias);
-				}
-			}
-			return pls;
+		public function generatePlayersJSON():String{
+			return JSON.stringify(players);
 		}
 		
+		public function extractPlayersFromJSON(json:String):Vector.<Player>{
+			if(json && json.charAt() == '[' && json.charAt(json.length-1) == ']'){
+				var arr:Array = JSON.parse(json) as Array;
+				return Vector.<Player>(arr);
+			}
+			return new Vector.<Player>;
+		}
 	}
 }

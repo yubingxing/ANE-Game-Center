@@ -117,7 +117,7 @@ DEFINE_ANE_FUNCTION( GC_getSystemLocaleLanguage )
     return [GC_handler getSystemLocaleLanguage];
 }
 
-DEFINE_ANE_FUNCTION( GC_isBluetoothAvailable)
+DEFINE_ANE_FUNCTION( isBluetoothAvailable )
 {
     return [GC_handler isBluetoothAvailable];
 }
@@ -204,7 +204,7 @@ void GameKitContextInitializer( void* extData, const uint8_t* ctxType, FREContex
         MAP_FUNCTION( GC_getAchievements, NULL ),
         MAP_FUNCTION( GC_getStoredAchievements, NULL ),
         MAP_FUNCTION( GC_alert, NULL ),
-        MAP_FUNCTION( GC_isBluetoothAvailable, NULL ),
+        MAP_FUNCTION( isBluetoothAvailable, NULL ),
         MAP_FUNCTION( GC_getSystemLocaleLanguage, NULL )
     };
     

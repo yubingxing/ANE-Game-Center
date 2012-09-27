@@ -2,9 +2,9 @@ package com.icestar.gamekit
 {
 	internal class NativeMethods
 	{
+		internal static const isBluetoothAvailable : String = "isBluetoothAvailable";
 		internal static const alert : String = "GC_alert";
 		internal static const getSystemLocaleLanguage : String = "GC_getSystemLocaleLanguage";
-		internal static const isBluetoothAvailable : String = "GC_isBluetoothAvailable";
 		internal static const isSupported : String = "GC_isSupported";
 		internal static const authenticateLocalPlayer : String = "GC_authenticateLocalPlayer";
 		internal static const getLocalPlayer : String = "GC_getLocalPlayer";

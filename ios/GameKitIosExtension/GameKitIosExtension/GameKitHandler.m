@@ -15,7 +15,7 @@
 #import "GC_LeaderboardWithNames.h"
 #import "GC_TypeConversion.h"
 
-#define DISPATCH_STATUS_EVENT(extensionContext, code, status) FREDispatchStatusEventAsync((extensionContext), (uint8_t*)code, (uint8_t*)status)
+#define DISPATCH_STATUS_EVENT(extensionContext, level, code) FREDispatchStatusEventAsync((extensionContext), (uint8_t*)code, (uint8_t*)level)
 
 #define ASLocalPlayer "com.icestar.gamekit.GCLocalPlayer"
 #define ASLeaderboard "com.icestar.gamekit.GCLeaderboard"
@@ -160,7 +160,7 @@ static NSString * appId;
                 else
                 {
                     userAuthenticated = NO;
-                    DISPATCH_STATUS_EVENT( context, [localPlayer JSONString], localPlayerNotAuthenticated );
+                    DISPATCH_STATUS_EVENT( context, (const uint8_t*)"", localPlayerNotAuthenticated );
                 }
             }];
         }
@@ -676,7 +676,7 @@ static NSString * appId;
 - (void)match:(GKMatch *)theMatch didReceiveData:(NSData *)data fromPlayer:(NSString *)playerID {
     if (match != theMatch) return;
     
-    handleReceivedData(playerID, data);
+    handleReceivedData(data);
 }
 
 // The player state changed (eg. connected or disconnected)
@@ -861,7 +861,7 @@ static NSString * appId;
         if(error){
             //Handler load player info error;
         }else{
-            DISPATCH_STATUS_EVENT(context, getPlayersString(players), matchPlayersInitialized);
+            DISPATCH_STATUS_EVENT(context, getPlayersString(players), match_players_initialized);
         };
     }];
 }
@@ -869,7 +869,7 @@ static NSString * appId;
 #pragma mark Add local net p2p connect
 
 - (void) initializeSessionPlayers:(GKSession *) session peers:(NSArray *) peers {
-    DISPATCH_STATUS_EVENT(context, getPeersString(peers, session), matchPlayersInitialized);
+    DISPATCH_STATUS_EVENT(context, getPeersString(peers, session), match_players_initialized);
 }
 
 /**
@@ -1047,17 +1047,17 @@ static NSString * appId;
 - (void) receiveData:(NSData *)data fromPeer:(NSString *)peer inSession: (GKSession *)session context:(void *)context
 {
 //    NSLog([NSString stringWithUTF8String:(const char*)[data bytes]]);
-    handleReceivedData(peer, data);
+    handleReceivedData(data);
 }
 
 void receiveFromPeer(NSData *data, NSString *peer, GKSession *session, void *context)
 {
-    handleReceivedData(peer, data);
+    handleReceivedData(data);
 }
 
-void handleReceivedData(NSString * peer, NSData * data) {
+void handleReceivedData(NSData * data) {
     NSString *datastr = [NSString stringWithUTF8String:[data bytes]];
-    datastr = [peer stringByAppendingFormat:@"%@::%@", peer, datastr];
+//    datastr = [datastr initWithFormat:@"{\"f\":\"%@\", \"d\":%@}", from, datastr];
     DISPATCH_STATUS_EVENT(context, (const uint8_t*)[datastr UTF8String], received_data_from);
 }
 @end

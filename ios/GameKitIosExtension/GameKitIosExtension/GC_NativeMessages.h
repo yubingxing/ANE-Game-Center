@@ -31,7 +31,7 @@
 #define received_client_request "received_client_request"
 
 #define received_data_from "received_data_from"
-#define matchPlayersInitialized "matchPlayersInitialized"
+#define match_players_initialized "match_players_initialized"
 #define request_match_cancelled "request_match_cancelled"
 #define request_match_failed "request_match_failed"
 #define request_match_complete "request_match_complete"
