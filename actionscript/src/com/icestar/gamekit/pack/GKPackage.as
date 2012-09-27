@@ -4,7 +4,7 @@ package  com.icestar.gamekit.pack
 	
 	import flash.utils.Dictionary;
 
-	public class Package
+	public class GKPackage
 	{
 		public const playerIndexes:Dictionary = new Dictionary;
 		public const playerIDs:Vector.<String> = new Vector.<String>;
@@ -13,7 +13,7 @@ package  com.icestar.gamekit.pack
 		
 		public var isFeedback:Boolean =false;
 		
-		public function Package(){
+		public function GKPackage(){
 		}
 		
 		public function addPlayer(playerID:String,index:int):void{

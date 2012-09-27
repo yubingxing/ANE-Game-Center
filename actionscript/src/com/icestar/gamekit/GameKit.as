@@ -1,19 +1,23 @@
 package com.icestar.gamekit
 {
-	import com.icestar.gamekit.event.GameCenterEvent;
-	import com.icestar.gamekit.event.GameKitEvent;
-	import com.icestar.gamekit.event.PeerSessionEvent;
+	import com.icestar.gamekit.event.GCEvent;
+	import com.icestar.gamekit.event.GKEvent;
+	import com.icestar.gamekit.event.GKP2PEvent;
 	import com.icestar.gamekit.gamecenter.GCMatch;
 	import com.icestar.gamekit.gamecenter.GCPlayer;
 	import com.icestar.gamekit.interfaces.IGameDelegate;
-	import com.icestar.gamekit.p2p.Peer;
-	import com.icestar.gamekit.p2p.Session;
-	import com.icestar.gamekit.p2p.SessionMode;
+	import com.icestar.gamekit.p2p.GKPeer;
+	import com.icestar.gamekit.p2p.GKSession;
+	import com.icestar.gamekit.p2p.GKSessionMode;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.StatusEvent;
 	import flash.external.ExtensionContext;
 	
+	/**
+	 * The utils of GameCenter and P2P local game
+	 * @author IceStar
+	 */
 	final public class GameKit {
 		private static const EXTENSION_ID:String = "com.icestar.GameKit";
 		private static const dispatcher:EventDispatcher = new EventDispatcher;
@@ -21,9 +25,9 @@ package com.icestar.gamekit
 		private static var _isAuthenticating : Boolean;
 		private static var _delegate:IGameDelegate;
 		
-		private static var _match:Match;
+		private static var _match:GKMatch;
 		private static var _expectedPlayerCount:int = 2;
-		private static var _curConnectionType:int = ConnectionType.LOCAL;
+		private static var _curGKConnectionType:int = GKConnectionType.LOCAL;
 		
 		private static var _gameCenterSupported : Boolean;
 		private static var _p2pSupported : Boolean;
@@ -33,10 +37,9 @@ package com.icestar.gamekit
 		private static var _gcMatch:GCMatch;
 		private static var _gcLocalPlayer:GCPlayer;
 		
-		private static var _session:Session;
-		private static var _p2pLocalPlayer:Peer;
+		private static var _p2pLocalPlayer:GKPeer;
 		
-		private static var _localPlayer : Player;
+		private static var _localPlayer : GKPlayer;
 		private static var _localPlayerTested : Boolean;
 		
 		private static var ext : ExtensionContext = null;
@@ -53,21 +56,26 @@ package com.icestar.gamekit
 		/**
 		 * Initialise the extension
 		 */
-		public static function init(delegate:IGameDelegate) : void
+		public static function init(delegate:IGameDelegate, gameCenterEnable:Boolean=true) : void
 		{
 			_delegate = delegate;
 			if ( !_initialised )
 			{
 				_initialised = true;
-				_gameCenterSupported = ext.call( NativeMethods.isSupported ) as Boolean;
-				_p2pSupported = ext.call( NativeMethods.isBluetoothAvailable ) as Boolean;
+				_gameCenterSupported = ext.call( GKNativeMethods.isSupported ) as Boolean;
+				_p2pSupported = ext.call( GKNativeMethods.isBluetoothAvailable ) as Boolean;
 				
-				_localPlayer = new Player;
-				_p2pLocalPlayer = new Peer;
+				_localPlayer = new GKPlayer;
+				_p2pLocalPlayer = new GKPeer;
 				_p2pLocalPlayer.displayName = "";
 				
 				ext = ExtensionContext.createExtensionContext( EXTENSION_ID, null );
 				ext.addEventListener( StatusEvent.STATUS, handleStatusEvent );
+				if(gameCenterEnable){
+					if(isGameCenterSupported){
+						authenticateLocalPlayer();
+					}
+				}
 			}
 		}
 		
@@ -119,7 +127,7 @@ package com.icestar.gamekit
 		}
 		
 		public static function get isLocal():Boolean {
-			return _curConnectionType == ConnectionType.LOCAL;
+			return _curGKConnectionType == GKConnectionType.LOCAL;
 		}
 		
 		public static function get isHost():Boolean {
@@ -127,32 +135,32 @@ package com.icestar.gamekit
 		}
 		
 		public static function get isServer():Boolean {
-			return _curConnectionType == ConnectionType.SERVER_CLIENT && isHost;
+			return _curGKConnectionType == GKConnectionType.SERVER_CLIENT && isHost;
 		}
 		
 		public static function get isClient():Boolean {
-			return _curConnectionType == ConnectionType.SERVER_CLIENT && !isHost;
+			return _curGKConnectionType == GKConnectionType.SERVER_CLIENT && !isHost;
 		}
 		
 		/**
 		 * Authenticate the local player
 		 */
-		public static function get localPlayer() : Player
+		public static function get localPlayer() : GKPlayer
 		{
 			assertIsAuthenticatedTested();
 			if( _isAuthenticated && !_localPlayerTested )
 			{
-				_localPlayer = ext.call( NativeMethods.getLocalPlayer ) as Player;
+				_localPlayer = ext.call( GKNativeMethods.getLocalPlayer ) as GKPlayer;
 			}
 			return _localPlayer;
 		}
 		
-		public static function get match():Match {
+		public static function get match():GKMatch {
 			return _match;
 		}
 		
-		public static function get detectedServers():Vector.<Peer> {
-			return _session.detectedServers;
+		public static function get detectedServers():Vector.<GKPeer> {
+			return GKSession.detectedServers;
 		}
 		
 		public static function set expectedPlayerCount(value:int):void {
@@ -213,13 +221,13 @@ package com.icestar.gamekit
 				connected = false;
 			}
 			//alert("connection type",String(_current_connection_type));
-			if(_curConnectionType == ConnectionType.GAME_CENTER){
+			if(_curGKConnectionType == GKConnectionType.GAME_CENTER){
 				if(_gcLocalPlayer){
 					localPlayer.id = _gcLocalPlayer.playerID;
 					localPlayer.alias = _gcLocalPlayer.alias;
 					//alert("_gcLocalPlayer","1");
 				}else{
-					_localPlayer = new Player();
+					_localPlayer = new GKPlayer();
 					//alert("_gcLocalPlayer","2");
 				}
 				delegate.onPlayerConnectionStatusChanged(localPlayer.id, connected);
@@ -239,7 +247,7 @@ package com.icestar.gamekit
 			delegate.onMatchRequestError();
 		}
 		private static function onMatchPlayersInitialized(e:*):void{
-			if(_curConnectionType == ConnectionType.PEER_2_PEER){
+			if(_curGKConnectionType == GKConnectionType.PEER_2_PEER){
 				onMatchRequestComplete(null);
 			}
 			if(e.level && e.level.charAt(0) == '['){
@@ -264,18 +272,18 @@ package com.icestar.gamekit
 			if(e.level && e.level.charAt() == '{'){
 				var p:Object = JSON.parse(e.level);
 			}
-			var peer:Peer = new Peer();
+			var peer:GKPeer = new GKPeer();
 			peer.peerID = p.id;
 			peer.displayName = p.alias;
-			if(_session){
-				if(_session.peers.length < _match.maxPlayers){
+			if(GKSession){
+				if(GKSession.peers.length < _match.maxPlayers){
 					acceptPeer(peer.peerID);
 				}else{
 					denyPeer(peer.peerID);
 				}
 			}
 		}
-		private static function onPlayerStatusChanged(e:StatusEvent):void{
+		private static function onGKPlayerStatusChanged(e:StatusEvent):void{
 			var p:Object = JSON.parse(e.level);
 			/**
 			 * Availibility only works in
@@ -283,14 +291,14 @@ package com.icestar.gamekit
 			 * 
 			 * */
 			switch(p.status){
-				case PlayerStatus.AVAILABLE:
+				case GKPlayerStatus.AVAILABLE:
 					if(isClient){
 						/**If it is Server Client mode, show avaible servers to client for accept.
 						 * */
-						var peer:Peer = new Peer();
+						var peer:GKPeer = new GKPeer();
 						peer.peerID = p.id;
 						peer.displayName = p.alias;
-						_session.addServer(peer);
+						GKSession.addServer(peer);
 						delegate.onPlayerAvailabilityChanged();
 					}else{
 						/**
@@ -299,18 +307,18 @@ package com.icestar.gamekit
 						joinServer(p.id);
 					}
 					break;
-				case PlayerStatus.UNAVAILABLE:
+				case GKPlayerStatus.UNAVAILABLE:
 					if(isClient){
-						_session.removeServer(p.id);
+						GKSession.removeServer(p.id);
 						delegate.onPlayerAvailabilityChanged();
 					}else{
 						onPlayerDisconnected(p.id);
 					}
 					break;
-				case PlayerStatus.CONNECTED:
+				case GKPlayerStatus.CONNECTED:
 					onPlayerConnected(p.id,p.alias);
 					break;
-				case PlayerStatus.DISCONNECTED:
+				case GKPlayerStatus.DISCONNECTED:
 					onPlayerDisconnected(p.id);
 					break;
 			}
@@ -320,30 +328,30 @@ package com.icestar.gamekit
 			//trace( "internal event", event.level );
 			switch( e.code )
 			{
-				//==================PeerSessionEvent=================
-				case PeerSessionEvent.RECEIVED_CLIENT_REQUEST:
+				//==================GKP2PEvent=================
+				case GKP2PEvent.RECEIVED_CLIENT_REQUEST:
 					onClientRequest(e);
 					break;
-				//==================GameKitEvent==================
-				case GameKitEvent.RECEIVED_DATA_FROM:
+				//==================GKEvent==================
+				case GKEvent.RECEIVED_DATA_FROM:
 					Router.receive(e.level);
 					break;
-				case GameKitEvent.CONNECTION_FAILED:
-					dispatcher.dispatchEvent(new GameKitEvent(GameKitEvent.CONNECTION_FAILED));
+				case GKEvent.CONNECTION_FAILED:
+					dispatcher.dispatchEvent(new GKEvent(GKEvent.CONNECTION_FAILED));
 					break;
-				case GameKitEvent.MATCH_PLAYERS_INITIALIZED:
+				case GKEvent.MATCH_PLAYERS_INITIALIZED:
 					onMatchPlayersInitialized(e);
 					break;
-				case GameKitEvent.PLAYER_AVAILABILITY_CHANGED:
+				case GKEvent.PLAYER_AVAILABILITY_CHANGED:
 					break;
-				case GameKitEvent.PLAYER_STATUS_CHANGED:
-					onPlayerStatusChanged(e);
+				case GKEvent.PLAYER_STATUS_CHANGED:
+					onGKPlayerStatusChanged(e);
 					break;
-				case GameKitEvent.REQUEST_MATCH_COMPLETE:
+				case GKEvent.REQUEST_MATCH_COMPLETE:
 					onMatchRequestComplete(e);
 					break;
-				//==================GameCenterEvent=================
-				case GameCenterEvent.LOCALPLAYER_AUTHENTICATED :
+				//==================GCEvent=================
+				case GCEvent.LOCALPLAYER_AUTHENTICATED :
 					_isAuthenticating = false;
 					_isAuthenticated = true;
 					_isAuthenticatedTested = true;
@@ -351,88 +359,88 @@ package com.icestar.gamekit
 					if(!_gcLocalPlayer)_gcLocalPlayer = new GCPlayer;
 					_gcLocalPlayer.playerID = localPlayer.id;
 					_gcLocalPlayer.alias = localPlayer.alias;
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOCALPLAYER_AUTHENTICATED));
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.LOCALPLAYER_AUTHENTICATED));
 					onAuthenticateStatusChanged(e);
 					break;
-				case GameCenterEvent.LOCALPLAYER_NOT_AUTHENTICATED :
+				case GCEvent.LOCALPLAYER_NOT_AUTHENTICATED :
 					_isAuthenticating = false;
 					_isAuthenticated = false;
 					_isAuthenticatedTested = true;
 					_localPlayerTested = false;
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOCALPLAYER_NOT_AUTHENTICATED));
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.LOCALPLAYER_NOT_AUTHENTICATED));
 					onAuthenticateStatusChanged(e);
 					break;
 				case NOT_AUTHENTICATED :
 					throw new Error( notAuthenticatedError );
 					break;
-				case GameCenterEvent.SCORE_REPORTED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.SCORE_REPORTED));
+				case GCEvent.SCORE_REPORTED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.SCORE_REPORTED));
 					break;
-				case GameCenterEvent.SCORE_NOT_REPORTED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.SCORE_NOT_REPORTED));
+				case GCEvent.SCORE_NOT_REPORTED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.SCORE_NOT_REPORTED));
 					break;
-				case GameCenterEvent.ACHIEVEMENT_REPORTED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.ACHIEVEMENT_REPORTED));
+				case GCEvent.ACHIEVEMENT_REPORTED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.ACHIEVEMENT_REPORTED));
 					break;
-				case GameCenterEvent.ACHIEVEMENT_NOT_REPORTED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.ACHIEVEMENT_NOT_REPORTED));
+				case GCEvent.ACHIEVEMENT_NOT_REPORTED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.ACHIEVEMENT_NOT_REPORTED));
 					break;
-				case GameCenterEvent.LOAD_FRIENDS_COMPLETE :
+				case GCEvent.LOAD_FRIENDS_COMPLETE :
 					var friends : Array = getReturnedPlayers( e.level );
 					if( friends )
-						dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_FRIENDS_COMPLETE, friends));
+						dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_FRIENDS_COMPLETE, friends));
 					else
-						dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_FRIENDS_FAILED));
+						dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_FRIENDS_FAILED));
 					break;
-				case GameCenterEvent.LOAD_FRIENDS_FAILED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_FRIENDS_FAILED));
+				case GCEvent.LOAD_FRIENDS_FAILED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_FRIENDS_FAILED));
 					break;
-				case GameCenterEvent.LOAD_LOCALPLAYER_SCORE_COMPLETE :
+				case GCEvent.LOAD_LOCALPLAYER_SCORE_COMPLETE :
 					var score : GCLeaderboard = getReturnedLocalPlayerScore( e.level );
 					if( score )
-						dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_LOCALPLAYER_SCORE_COMPLETE, score));
+						dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_LOCALPLAYER_SCORE_COMPLETE, score));
 					else
-						dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_LOCALPLAYER_SCORE_FAILED));
+						dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_LOCALPLAYER_SCORE_FAILED));
 					break;
-				case GameCenterEvent.LOAD_LOCALPLAYER_SCORE_FAILED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_LOCALPLAYER_SCORE_FAILED));
+				case GCEvent.LOAD_LOCALPLAYER_SCORE_FAILED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_LOCALPLAYER_SCORE_FAILED));
 					break;
-				case GameCenterEvent.GAMECENTER_VIEW_REMOVED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.GAMECENTER_VIEW_REMOVED));
+				case GCEvent.GAMECENTER_VIEW_REMOVED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.GAMECENTER_VIEW_REMOVED));
 					break;
-				case GameCenterEvent.LOAD_LEADERBOARD_COMPLETE :
+				case GCEvent.LOAD_LEADERBOARD_COMPLETE :
 					var leaderboard : GCLeaderboard = getStoredLeaderboard( e.level );
 					if( leaderboard )
-						dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_LEADERBOARD_COMPLETE, leaderboard));
+						dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_LEADERBOARD_COMPLETE, leaderboard));
 					else
-						dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_LEADERBOARD_FAILED));
+						dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_LEADERBOARD_FAILED));
 					break;
-				case GameCenterEvent.LOAD_LEADERBOARD_FAILED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_LEADERBOARD_FAILED));
+				case GCEvent.LOAD_LEADERBOARD_FAILED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_LEADERBOARD_FAILED));
 					break;
-				case GameCenterEvent.LOAD_ACHIEVEMENTS_COMPLETE :
+				case GCEvent.LOAD_ACHIEVEMENTS_COMPLETE :
 					var achievements : Vector.<GCAchievement> = getStoredAchievements( e.level );
 					if( achievements )
-						dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_ACHIEVEMENTS_COMPLETE, achievements));
+						dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_ACHIEVEMENTS_COMPLETE, achievements));
 					else
-						dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_ACHIEVEMENTS_FAILED));
+						dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_ACHIEVEMENTS_FAILED));
 					break;
-				case GameCenterEvent.LOAD_ACHIEVEMENTS_FAILED :
-					dispatcher.dispatchEvent(new GameCenterEvent(GameCenterEvent.LOAD_ACHIEVEMENTS_FAILED));
+				case GCEvent.LOAD_ACHIEVEMENTS_FAILED :
+					dispatcher.dispatchEvent(new GCEvent(GCEvent.LOAD_ACHIEVEMENTS_FAILED));
 					break;
 			}
 		}
 		
 		public static function alert(title:String, msg:String):void {
-			ext.call(NativeMethods.alert, title, msg);
+			ext.call(GKNativeMethods.alert, title, msg);
 		}
 		
 		public static function getSystemLocaleLanguage():String {
-			return ext.call(NativeMethods.getSystemLocaleLanguage) as String;
+			return ext.call(GKNativeMethods.getSystemLocaleLanguage) as String;
 		}
 		
 		public static function isBluetoothAvailable():Boolean {
-			return ext.call(NativeMethods.isBluetoothAvailable) as Boolean;
+			return ext.call(GKNativeMethods.isBluetoothAvailable) as Boolean;
 		}
 		
 		/**
@@ -442,30 +450,70 @@ package com.icestar.gamekit
 		{
 			assertIsSupported();
 			_isAuthenticating = true;
-			ext.call( NativeMethods.authenticateLocalPlayer );
+			ext.call( GKNativeMethods.authenticateLocalPlayer );
 		}
 		
 		/**
 		 * Report a score to Game Center
 		 */
-		public static function reportScore( category : String, value : int ) : void
+		public static function reportScore( category : String, value : int, onResult:Function=null ) : void
 		{
 			assertIsAuthenticated();
+			if(onResult != null) {
+				function removeListener():void {
+					removeEventListener(GCEvent.SCORE_REPORTED, scoreReportSuccess);
+					removeEventListener(GCEvent.SCORE_NOT_REPORTED, scoreReportFailed);
+				}
+				function scoreReportSuccess(e:GCEvent):void {
+					removeListener();
+					if(onResult != null)
+						onResult.call(null, true);
+					trace("scoreReportSuccess");
+				}
+				function scoreReportFailed(e:GCEvent):void {
+					removeListener();
+					if(onResult != null)
+						onResult.call(null, false);
+					trace("scoreReportFailed");
+				}
+				addEventListener(GCEvent.SCORE_REPORTED, scoreReportSuccess);
+				addEventListener(GCEvent.SCORE_NOT_REPORTED, scoreReportFailed);
+			}
 			if( localPlayer )
 			{
-				ext.call( NativeMethods.reportScore, category, value );
+				ext.call( GKNativeMethods.reportScore, category, value );
 			}
 		}
 		
 		/**
 		 * Report a achievement to Game Center
 		 */
-		public static function reportAchievement( category : String, value : Number, banner : Boolean = false ) : void
+		public static function reportAchievement( category : String, value : Number, banner : Boolean = false, onResult:Function = null ) : void
 		{
 			assertIsAuthenticated();
+			if(onResult != null) {
+				function removeListener():void {
+					removeEventListener(GCEvent.ACHIEVEMENT_REPORTED, achievementReportSuccess);
+					removeEventListener(GCEvent.ACHIEVEMENT_NOT_REPORTED, achievementReportFailed);
+				}
+				function achievementReportSuccess(e:GCEvent):void {
+					removeListener();
+					if(onResult != null)
+						onResult.call(null, false);
+					trace("achievementReportSuccess");
+				}
+				function achievementReportFailed(e:GCEvent):void {
+					removeListener();
+					if(onResult != null)
+						onResult.call(null, false);
+					trace("achievementReportFailed");
+				}
+				addEventListener(GCEvent.ACHIEVEMENT_REPORTED, achievementReportSuccess);
+				addEventListener(GCEvent.ACHIEVEMENT_NOT_REPORTED, achievementReportFailed);
+			}
 			if( localPlayer )
 			{
-				ext.call( NativeMethods.reportAchievement, category, value, banner );
+				ext.call( GKNativeMethods.reportAchievement, category, value, banner );
 			}
 		}
 		
@@ -478,20 +526,20 @@ package com.icestar.gamekit
 				{
 					if( timeScope != -1 )
 					{
-						ext.call( NativeMethods.showStandardLeaderboardWithCategoryAndTimescope, category, timeScope );
+						ext.call( GKNativeMethods.showStandardLeaderboardWithCategoryAndTimescope, category, timeScope );
 					}
 					else
 					{
-						ext.call( NativeMethods.showStandardLeaderboardWithCategory, category );
+						ext.call( GKNativeMethods.showStandardLeaderboardWithCategory, category );
 					}
 				}
 				else if( timeScope != -1 )
 				{
-					ext.call( NativeMethods.showStandardLeaderboardWithTimescope, timeScope );
+					ext.call( GKNativeMethods.showStandardLeaderboardWithTimescope, timeScope );
 				}
 				else
 				{
-					ext.call( NativeMethods.showStandardLeaderboard );
+					ext.call( GKNativeMethods.showStandardLeaderboard );
 				}
 			}
 		}
@@ -501,134 +549,218 @@ package com.icestar.gamekit
 			assertIsAuthenticated();
 			if( localPlayer )
 			{
-				ext.call( NativeMethods.showStandardAchievements );
+				ext.call( GKNativeMethods.showStandardAchievements );
 			}
 		}
 		
-		public static function getLocalPlayerFriends() : void
+		public static function getLocalPlayerFriends(onResult:Function) : void
 		{
 			assertIsAuthenticated();
+			if(onResult != null) {
+				function removeListener():void {
+					removeEventListener(GCEvent.LOAD_FRIENDS_COMPLETE, localPlayerFriendsLoaded);
+					removeEventListener(GCEvent.LOAD_FRIENDS_FAILED, localPlayerFriendsFailed);
+				}
+				function localPlayerFriendsLoaded(e:GCEvent):void {
+					removeListener();
+					var friends:Array = e.data;
+					if(onResult != null)
+						onResult.call(null, friends);
+					trace("localPlayerFriendsLoaded");
+				}
+				function localPlayerFriendsFailed(e:GCEvent):void {
+					removeListener();
+					if(onResult != null)
+						onResult.call(null, []);
+					trace("localPlayerFriendsFailed");
+				}
+				addEventListener(GCEvent.LOAD_FRIENDS_COMPLETE, localPlayerFriendsLoaded);
+				addEventListener(GCEvent.LOAD_FRIENDS_FAILED, localPlayerFriendsFailed);
+			}
 			if( localPlayer )
 			{
-				ext.call( NativeMethods.getLocalPlayerFriends );
+				ext.call( GKNativeMethods.getLocalPlayerFriends );
 			}
 		}
 		
-		public static function getLocalPlayerScore( category : String, playerScope : int = 0, timeScope : int = 2 ) : void
+		public static function getLocalPlayerScore( category : String, playerScope : int = 0, timeScope : int = 2, onResult:Function = null ) : void
 		{
 			assertIsAuthenticated();
-			if( localPlayer )
-			{
-				ext.call( NativeMethods.getLocalPlayerScore, category, playerScope, timeScope );
+			if(onResult != null) {
+				function removeListener():void {
+					removeEventListener(GCEvent.LOAD_LOCALPLAYER_SCORE_COMPLETE, _localPlayerScoreLoaded);
+					removeEventListener(GCEvent.LOAD_LOCALPLAYER_SCORE_FAILED, _localPlayerScoreFailed);
+				}
+				function _localPlayerScoreLoaded(e:GCEvent):void {
+					removeListener();
+					var leaderboard:GCLeaderboard = e.data;
+					if(leaderboard.localPlayerScore && onResult != null){
+						onResult.call(null, leaderboard.localPlayerScore);
+					}
+				}
+				function _localPlayerScoreFailed(e:GCEvent):void {
+					removeListener();
+					if(onResult != null)
+						onResult.call();
+					trace("localPlayerScoreFailed");
+				}
+				addEventListener(GCEvent.LOAD_LOCALPLAYER_SCORE_COMPLETE, _localPlayerScoreLoaded);
+				addEventListener(GCEvent.LOAD_LOCALPLAYER_SCORE_FAILED, _localPlayerScoreFailed);
+			}
+			if( localPlayer ) {
+				ext.call( GKNativeMethods.getLocalPlayerScore, category, playerScope, timeScope );
 			}
 		}
 		
-		public static function getLeaderboard( category : String, playerScope : int = 0, timeScope : int = 2, rangeStart : int = 1, rangeLength : int = 25 ) : void
+		public static function getLeaderboard( category : String, playerScope : int = 0, timeScope : int = 2, rangeStart : int = 1, rangeLength : int = 25, onResult:Function = null ) : void
 		{
 			assertIsAuthenticated();
+			if(onResult != null) {
+				function removeListener():void {
+					removeEventListener(GCEvent.LOAD_LEADERBOARD_COMPLETE, leaderboardLoaded);	
+					removeEventListener(GCEvent.LOAD_LEADERBOARD_FAILED, leaderboardFailed);	
+				}
+				function leaderboardLoaded(e:GCEvent):void {
+					removeListener();
+					var leaderboard:GCLeaderboard = e.data;
+					if(onResult != null){
+						onResult.call(null, leaderboard);
+					}
+				}
+				function leaderboardFailed(e:GCEvent):void {
+					removeListener();
+					if(onResult != null)
+						onResult.call();
+					trace("localPlayerScoreFailed");
+				}
+				addEventListener(GCEvent.LOAD_LEADERBOARD_COMPLETE, leaderboardLoaded);	
+				addEventListener(GCEvent.LOAD_LEADERBOARD_FAILED, leaderboardFailed);	
+			}
 			if( localPlayer )
 			{
-				ext.call( NativeMethods.getLeaderboard, category, playerScope, timeScope, rangeStart, rangeLength );
+				ext.call( GKNativeMethods.getLeaderboard, category, playerScope, timeScope, rangeStart, rangeLength );
 			}
 		}
 		
-		public static function getAchievements() : void
+		public static function getAchievements(onResult:Function=null) : void
 		{
 			assertIsAuthenticated();
+			if(onResult != null) {
+				function removeListener():void {
+					removeEventListener(GCEvent.LOAD_ACHIEVEMENTS_COMPLETE, achievementLoaded);	
+					removeEventListener(GCEvent.LOAD_ACHIEVEMENTS_FAILED, achievementFailed);	
+				}
+				function achievementLoaded(e:GCEvent):void {
+					removeListener();
+					var achievements:Vector.<GCAchievement> = e.data;
+					if(onResult != null){
+						onResult.call(null, achievements);
+					}
+				}
+				function achievementFailed(e:GCEvent):void {
+					removeListener();
+					if(onResult != null){
+						onResult.call();
+					}
+					trace("localPlayerScoreFailed");
+				}
+				removeEventListener(GCEvent.LOAD_ACHIEVEMENTS_COMPLETE, achievementLoaded);	
+				removeEventListener(GCEvent.LOAD_ACHIEVEMENTS_FAILED, achievementFailed);	
+			}
 			if( localPlayer )
 			{
-				ext.call( NativeMethods.getAchievements );
+				ext.call( GKNativeMethods.getAchievements );
 			}
 		}
 		
 		private static function getStoredLeaderboard( key : String ) : GCLeaderboard
 		{
-			return ext.call( NativeMethods.getStoredLeaderboard, key ) as GCLeaderboard;
+			return ext.call( GKNativeMethods.getStoredLeaderboard, key ) as GCLeaderboard;
 		}
 		
 		private static function getStoredAchievements( key : String ) : Vector.<GCAchievement>
 		{
-			return ext.call( NativeMethods.getStoredAchievements, key ) as Vector.<GCAchievement>;
+			return ext.call( GKNativeMethods.getStoredAchievements, key ) as Vector.<GCAchievement>;
 		}
 		
 		private static function getReturnedLocalPlayerScore( key : String ) : GCLeaderboard
 		{
-			return ext.call( NativeMethods.getStoredLocalPlayerScore, key ) as GCLeaderboard;
+			return ext.call( GKNativeMethods.getStoredLocalPlayerScore, key ) as GCLeaderboard;
 		}
 		
 		private static function getReturnedPlayers( key : String ) : Array
 		{
-			return ext.call( NativeMethods.getStoredPlayers, key ) as Array;
+			return ext.call( GKNativeMethods.getStoredPlayers, key ) as Array;
 		}
 		
 		public static function showMatchMaker( minPlayers:int, maxPlayers:int ):void {
-			ext.call( NativeMethods.showMatchMaker, minPlayers, maxPlayers);
+			ext.call( GKNativeMethods.showMatchMaker, minPlayers, maxPlayers);
 		}
 		
-		public static function requestPeerMatch(myName:String, sessionMode:int=SessionMode.PEER, expectedPlayerCount:int=2):String {
-			return ext.call( NativeMethods.requestPeerMatch, myName, sessionMode, expectedPlayerCount) as String;
+		public static function requestPeerMatch(myName:String, sessionMode:int=1, expectedPlayerCount:int=2):String {
+			return ext.call( GKNativeMethods.requestPeerMatch, myName, sessionMode, expectedPlayerCount) as String;
 		}
 		
 		public static function joinServer(peerId:String):void {
-			ext.call( NativeMethods.joinServer, peerId);
+			ext.call( GKNativeMethods.joinServer, peerId);
 		}
 		
 		public static function acceptPeer(peerID:String):void {
-			ext.call( NativeMethods.acceptPeer, peerID);
+			ext.call( GKNativeMethods.acceptPeer, peerID);
 		}
 		
 		public static function denyPeer(peerID:String):void {
-			ext.call( NativeMethods.denyPeer, peerID);
+			ext.call( GKNativeMethods.denyPeer, peerID);
 		}
 		
 		public function disconnectFromPeer(peerID:String):void{
-			ext.call(NativeMethods.denyPeer, peerID);
-			_session.removePeer(peerID);
-			syncMatchPlayers(_session.peers);
+			ext.call(GKNativeMethods.denyPeer, peerID);
+			GKSession.removePeer(peerID);
+			syncMatchPlayers(GKSession.peers);
 			delegate.onPlayerConnectionStatusChanged(peerID,false);
 		}
-
-		public static function requestMatch(type:int, sessionMode:int=SessionMode.PEER, minPlayers:int=2, maxPlayers:int=4):void {
-			_curConnectionType = type;
-			_match = new Match();
-			_match.connectionType = _curConnectionType;
+		
+		public static function requestMatch(type:int, sessionMode:int=1, minPlayers:int=2, maxPlayers:int=4):void {
+			_curGKConnectionType = type;
+			_match = new GKMatch();
+			_match.connectionType = _curGKConnectionType;
 			_match.minPlayers = minPlayers;
 			_match.maxPlayers = maxPlayers;
 			
 			switch(type) {
-				case ConnectionType.LOCAL:
-					_localPlayer = new Player();
+				case GKConnectionType.LOCAL:
+					_localPlayer = new GKPlayer();
 					_localPlayer.id = "1";
 					_localPlayer.alias = "My Name";
 					_match.hostPlayerID = _localPlayer.id;
 					delegate.initializeMatchAsHost();
 					break;
-				case ConnectionType.GAME_CENTER:
-					_localPlayer = new Player;
+				case GKConnectionType.GAME_CENTER:
+					_localPlayer = new GKPlayer;
 					_localPlayer.id = _gcLocalPlayer.playerID;
 					_localPlayer.alias = _gcLocalPlayer.alias;
-					ext.call( NativeMethods.showMatchMaker, minPlayers, maxPlayers);
+					ext.call( GKNativeMethods.showMatchMaker, minPlayers, maxPlayers);
 					break;
-				case ConnectionType.PEER_2_PEER:
-					_session = new Session;
-					_session.mode = sessionMode;
-					_session.addPeer(_p2pLocalPlayer);
+				case GKConnectionType.PEER_2_PEER:
+					GKSession.init();
+					GKSession.mode = sessionMode;
+					GKSession.addPeer(_p2pLocalPlayer);
 					
-					_p2pLocalPlayer.peerID = ext.call(NativeMethods.requestPeerMatch, peerDisplayName, sessionMode, expectedPlayerCount) as String;
+					_p2pLocalPlayer.peerID = ext.call(GKNativeMethods.requestPeerMatch, peerDisplayName, sessionMode, expectedPlayerCount) as String;
 					
-					_localPlayer = new Player;
+					_localPlayer = new GKPlayer;
 					_localPlayer.id = _p2pLocalPlayer.peerID;
 					_localPlayer.alias = _p2pLocalPlayer.displayName;
 					
-					if(sessionMode == SessionMode.SERVER){
+					if(sessionMode == GKSessionMode.SERVER){
 						_match.hostPlayerID = _localPlayer.id;
-					} else if (sessionMode == SessionMode.PEER) {
+					} else if (sessionMode == GKSessionMode.PEER) {
 						_match.maxPlayers = expectedPlayerCount;
 					}
 					
-					syncMatchPlayers(_session.peers);
+					syncMatchPlayers(GKSession.peers);
 					break;
-				case ConnectionType.SERVER_CLIENT:
+				case GKConnectionType.SERVER_CLIENT:
 					break;
 			}
 		}
@@ -640,13 +772,13 @@ package com.icestar.gamekit
 		 * This function is called by host only;
 		 * */
 		public static function prepareForEnteringMatch():void{
-			if(_curConnectionType == ConnectionType.GAME_CENTER){
+			if(_curGKConnectionType == GKConnectionType.GAME_CENTER){
 				
 			}else{
 				/**
 				 * For Server, Client or Peers, all need lock session.
 				 * */
-				ext.call(NativeMethods.lockSession);
+				ext.call(GKNativeMethods.lockSession);
 			}
 			delegate.onMatchRequestComplete();
 			broadcastToOthers("<entering/>");
@@ -659,18 +791,18 @@ package com.icestar.gamekit
 		}
 		
 		private static function onPlayerConnected(playerID:String,playerAlias:String):void{
-			var peer:Peer;
+			var peer:GKPeer;
 			
-			if(_curConnectionType == ConnectionType.GAME_CENTER){
+			if(_curGKConnectionType == GKConnectionType.GAME_CENTER){
 				
-			}else if(_curConnectionType == ConnectionType.SERVER_CLIENT){
+			}else if(_curGKConnectionType == GKConnectionType.SERVER_CLIENT){
 				//trace(_match.hostPlayerID,_localPlayer.id, playerID);
 				if(isHost){
-					peer = new Peer();
+					peer = new GKPeer();
 					peer.peerID = playerID;
 					peer.displayName = playerAlias;
-					_session.addPeer(peer);
-					syncMatchPlayers(_session.peers);
+					GKSession.addPeer(peer);
+					syncMatchPlayers(GKSession.peers);
 					/**
 					 * For a Server - Client connection, client only connects to server,
 					 * so server need broadcast the whole player list to each client.
@@ -680,33 +812,33 @@ package com.icestar.gamekit
 					/** A client can only get the connectivity infomation from server.*/
 					_match.hostPlayerID = playerID;
 				}
-			}else if(_curConnectionType == ConnectionType.PEER_2_PEER){
-				peer = new Peer();
+			}else if(_curGKConnectionType == GKConnectionType.PEER_2_PEER){
+				peer = new GKPeer();
 				peer.peerID = playerID;
 				peer.displayName = playerAlias;
-				_session.addPeer(peer);
-				syncMatchPlayers(_session.peers);
+				GKSession.addPeer(peer);
+				syncMatchPlayers(GKSession.peers);
 			}
 			delegate.onPlayerConnectionStatusChanged(playerID,true);
 		}
 		
 		private static function onPlayerDisconnected(playerID:String):void{
 			Router.disconnectPlayer(playerID);
-			if(_curConnectionType == ConnectionType.GAME_CENTER){
-			}else if(_curConnectionType == ConnectionType.SERVER_CLIENT){
+			if(_curGKConnectionType == GKConnectionType.GAME_CENTER){
+			}else if(_curGKConnectionType == GKConnectionType.SERVER_CLIENT){
 				
 				if(isHost){
-					_session.removePeer(playerID);
-					syncMatchPlayers(_session.peers);
+					GKSession.removePeer(playerID);
+					syncMatchPlayers(GKSession.peers);
 					broadcastToOthers(_match.generatePlayersJSON());
 				}else{
 					/** A client can only get the connectivity infomation from server.*/
 					//_match.hostPlayerID = null;
 				}
 				
-			}else if(_curConnectionType == ConnectionType.PEER_2_PEER){
-				_session.removePeer(playerID);
-				syncMatchPlayers(_session.peers);
+			}else if(_curGKConnectionType == GKConnectionType.PEER_2_PEER){
+				GKSession.removePeer(playerID);
+				syncMatchPlayers(GKSession.peers);
 			}
 			delegate.onPlayerConnectionStatusChanged(playerID,false);
 		}
@@ -742,10 +874,10 @@ package com.icestar.gamekit
 		}
 		
 		public static function sendDataTo(playerIDs:Vector.<String>, data:String):void{
-			if(_curConnectionType == ConnectionType.GAME_CENTER){
-				ext.call(NativeMethods.sendDataToGCPlayers, playerIDs.join(","), data);
-			}else if(_curConnectionType == ConnectionType.PEER_2_PEER){
-				ext.call(NativeMethods.sendDataToPeers, playerIDs.join(","), data);
+			if(_curGKConnectionType == GKConnectionType.GAME_CENTER){
+				ext.call(GKNativeMethods.sendDataToGCPlayers, playerIDs.join(","), data);
+			}else if(_curGKConnectionType == GKConnectionType.PEER_2_PEER){
+				ext.call(GKNativeMethods.sendDataToPeers, playerIDs.join(","), data);
 			}
 		}
 		
@@ -761,10 +893,10 @@ package com.icestar.gamekit
 			Router.nextActionOfPlayer(playerID);
 		}
 		public static function quitMatch():void{
-			if(_curConnectionType == ConnectionType.GAME_CENTER){
-				ext.call(NativeMethods.disconnectFromGCMatch);
-			}else if(_curConnectionType == ConnectionType.PEER_2_PEER){
-				ext.call(NativeMethods.disconnectFromAllPeers);
+			if(_curGKConnectionType == GKConnectionType.GAME_CENTER){
+				ext.call(GKNativeMethods.disconnectFromGCMatch);
+			}else if(_curGKConnectionType == GKConnectionType.PEER_2_PEER){
+				ext.call(GKNativeMethods.disconnectFromAllPeers);
 			}
 		}
 		/**
@@ -775,8 +907,8 @@ package com.icestar.gamekit
 			if ( ext )
 			{
 				_match = null;
-				_session = null;
 				_localPlayer = null;
+				GKSession.init();
 				ext.dispose();
 				ext = null;
 			}
@@ -785,8 +917,8 @@ package com.icestar.gamekit
 	}
 }
 import com.icestar.gamekit.GameKit;
-import com.icestar.gamekit.pack.Package;
-import com.icestar.gamekit.pack.PlayerPackageBuffer;
+import com.icestar.gamekit.pack.GKPackage;
+import com.icestar.gamekit.pack.GKPlayerPackageBuffer;
 
 import flash.events.EventDispatcher;
 import flash.events.TimerEvent;
@@ -795,15 +927,15 @@ import flash.utils.Timer;
 
 internal class Router {
 	private static const packageIndexPool:Dictionary = new Dictionary;
-	private static const packages:Vector.<Package> = new Vector.<Package>;
-	private static const playerPackageBuffers:Vector.<PlayerPackageBuffer> = new Vector.<PlayerPackageBuffer>;
+	private static const packages:Vector.<GKPackage> = new Vector.<GKPackage>;
+	private static const playerPackageBuffers:Vector.<GKPlayerPackageBuffer> = new Vector.<GKPlayerPackageBuffer>;
 	
 	private static var packageNumber:int = 0;
 	private static var interval:int = 300;
 	private static var _timer:Timer;
 	
 	private var currentPulseIndex:int=0;
-
+	
 	public static function get timer():Timer {
 		if(_timer == null) {
 			_timer = new Timer(interval);
@@ -814,7 +946,7 @@ internal class Router {
 	
 	public static function send(playerIDs:Vector.<String>, data:String):void{
 		//trace(data);
-		var pck:Package = new Package();
+		var pck:GKPackage = new GKPackage();
 		
 		for each(var p:String in playerIDs){
 			if(packageIndexPool[p]==null){
@@ -859,7 +991,7 @@ internal class Router {
 	}
 	
 	private static function giveFeedbackTo(playerID:String,index:int):void{
-		var pck:Package = new Package();
+		var pck:GKPackage = new GKPackage();
 		pck.addPlayer(playerID,index);
 		pck.isFeedback = true;
 		//packages.push(pck);
@@ -871,7 +1003,7 @@ internal class Router {
 	
 	private static function handleFeedbackFrom(playerID:String,index:int):void{
 		var i:int = 0;
-		for each (var p:Package in packages) {
+		for each (var p:GKPackage in packages) {
 			if(p.getPlayerIndex(playerID) == index){
 				p.removePlayer(playerID);
 				if(p.playerIDs.length == 0){
@@ -888,7 +1020,7 @@ internal class Router {
 	
 	private static function sendPulse():void{
 		/*if(packages.length>0){
-		var pck:Package = packages[currentPulseIndex];
+		var pck:GKPackage = packages[currentPulseIndex];
 		GameKit.manager.sendDataTo(pck.playerIDs,pck.generateData());
 		if(pck.isFeedback){
 		packages.splice(currentPulseIndex--,1);
@@ -901,13 +1033,13 @@ internal class Router {
 		}else{
 		pause();
 		}*/
-		for each(var pck:Package in packages){
+		for each(var pck:GKPackage in packages){
 			GameKit.sendDataTo(pck.playerIDs, pck.toJson());
 		}
 	}
 	
-	private static function getBufferById(playerID:String):PlayerPackageBuffer{
-		for each(var buffer:PlayerPackageBuffer in playerPackageBuffers){
+	private static function getBufferById(playerID:String):GKPlayerPackageBuffer{
+		for each(var buffer:GKPlayerPackageBuffer in playerPackageBuffers){
 			if(buffer.playerID == playerID){
 				return buffer;
 			}
@@ -916,13 +1048,13 @@ internal class Router {
 	}
 	
 	private static function addToBuffer(playerID:String, index:int, data:*):void{
-		var buffer:PlayerPackageBuffer = getBufferById(playerID);
+		var buffer:GKPlayerPackageBuffer = getBufferById(playerID);
 		if(buffer==null){
-			buffer = new PlayerPackageBuffer(playerID);
+			buffer = new GKPlayerPackageBuffer(playerID);
 			playerPackageBuffers.push(buffer);
 		}
 		
-		var pck:Package = new Package();
+		var pck:GKPackage = new GKPackage();
 		pck.addPlayer(playerID,index);
 		pck.data = data;
 		
@@ -932,7 +1064,7 @@ internal class Router {
 	}
 	
 	public static function nextActionOfPlayer(playerID:String):void{
-		var buffer:PlayerPackageBuffer = getBufferById(playerID);
+		var buffer:GKPlayerPackageBuffer = getBufferById(playerID);
 		if(buffer){
 			GameKit.onReceivedDataFrom(playerID, buffer.shiftAction());
 		}
@@ -943,7 +1075,7 @@ internal class Router {
 		 * Remove sending data queue.
 		 * */
 		var i:int = 0;
-		for each(var p:Package in packages){
+		for each(var p:GKPackage in packages){
 			p.removePlayer(playerID);
 			if(p.playerIDs.length==0){
 				packages.splice(i,1);
@@ -957,7 +1089,7 @@ internal class Router {
 		 * Remove action queue.
 		 * */
 		i = 0;
-		for each (var pf:PlayerPackageBuffer in playerPackageBuffers) {
+		for each (var pf:GKPlayerPackageBuffer in playerPackageBuffers) {
 			if(pf.playerID == playerID){
 				playerPackageBuffers.splice(i,1);
 				return;

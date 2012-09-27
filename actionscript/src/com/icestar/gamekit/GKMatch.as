@@ -1,38 +1,38 @@
 package com.icestar.gamekit
 {
 	import com.icestar.gamekit.gamecenter.GCPlayer;
-	import com.icestar.gamekit.p2p.Peer;
+	import com.icestar.gamekit.p2p.GKPeer;
 	
 	import flash.events.EventDispatcher;
 
-	public class Match extends EventDispatcher
+	public class GKMatch extends EventDispatcher
 	{ 
 		public var id:String;
 		public var connectionType:int;
-		public var players:Vector.<Player>;
+		public var players:Vector.<GKPlayer>;
 		public var hostPlayerID:String;
 		
 		public var minPlayers:int;
 		public var maxPlayers:int;
 
-		public function Match()
+		public function GKMatch()
 		{
 		}
 		
-		public function initializePlayers(players:Array,localPlayer:Player):void{
-			players = new Vector.<Player>;
+		public function initializePlayers(players:Array,localPlayer:GKPlayer):void{
+			players = new Vector.<GKPlayer>;
 			
 			var resortArray:Array = [localPlayer];
 			for each(var p:Object in players){
-				resortArray.push(p as Player);
+				resortArray.push(p as GKPlayer);
 			}
-			if(connectionType == ConnectionType.GAME_CENTER){
+			if(connectionType == GKConnectionType.GAME_CENTER){
 				resortArray.sortOn("id",Array.CASEINSENSITIVE);
-			}else if(connectionType == ConnectionType.PEER_2_PEER || connectionType == ConnectionType.SERVER_CLIENT){
+			}else if(connectionType == GKConnectionType.PEER_2_PEER || connectionType == GKConnectionType.SERVER_CLIENT){
 				resortArray.sortOn("id",Array.NUMERIC);
 			}
 			
-			for each(var pl:Player in resortArray){
+			for each(var pl:GKPlayer in resortArray){
 				players.push(pl);
 			}
 			
@@ -42,7 +42,7 @@ package com.icestar.gamekit
 		}
 		
 		private function randomSortPlayers():void{
-			var tmpPlayers:Vector.<Player> = new Vector.<Player>;
+			var tmpPlayers:Vector.<GKPlayer> = new Vector.<GKPlayer>;
 			var len:int = players.length;
 			for(var i:int=0;i<len;i++){
 				var index:int = int(Math.random()* players.length);
@@ -59,36 +59,36 @@ package com.icestar.gamekit
 		}
 		
 		public function syncPlayers(pPlayers:*):void{
-			players = new Vector.<Player>;
-			var player:Player;
+			players = new Vector.<GKPlayer>;
+			var player:GKPlayer;
 			
-			if(pPlayers is Vector.<Player>){
+			if(pPlayers is Vector.<GKPlayer>){
 				players = pPlayers;
 			}else if(pPlayers is Vector.<GCPlayer>){
 				for each(var p:GCPlayer in pPlayers){
-					player = new Player();
+					player = new GKPlayer();
 					player.id = p.playerID;
 					player.alias = p.alias;
 					players.push(player);
 				}
 				
-			}else if(pPlayers is Vector.<Peer>){
-				for each(var pr:Peer in pPlayers){
-					player = new Player();
+			}else if(pPlayers is Vector.<GKPeer>){
+				for each(var pr:GKPeer in pPlayers){
+					player = new GKPlayer();
 					player.id = pr.peerID;
 					player.alias = pr.displayName;
 					players.push(player);
 				}
 			}
 			
-			if(connectionType == ConnectionType.GAME_CENTER){
+			if(connectionType == GKConnectionType.GAME_CENTER){
 				hostPlayerID = players[0].id;
 			}
 		}
 		
 		public function getOtherPlayerIDs(exceptPlayerID:String=""):Vector.<String>{
 			var ids:Vector.<String> = new Vector.<String>;
-			for each(var p:Player in players){
+			for each(var p:GKPlayer in players){
 				if(exceptPlayerID != p.id){
 					ids.push(p.id);
 				}
@@ -100,12 +100,12 @@ package com.icestar.gamekit
 			return JSON.stringify(players);
 		}
 		
-		public function extractPlayersFromJSON(json:String):Vector.<Player>{
+		public function extractPlayersFromJSON(json:String):Vector.<GKPlayer>{
 			if(json && json.charAt() == '[' && json.charAt(json.length-1) == ']'){
 				var arr:Array = JSON.parse(json) as Array;
-				return Vector.<Player>(arr);
+				return Vector.<GKPlayer>(arr);
 			}
-			return new Vector.<Player>;
+			return new Vector.<GKPlayer>;
 		}
 	}
 }

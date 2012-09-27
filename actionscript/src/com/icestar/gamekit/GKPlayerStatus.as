@@ -1,6 +1,6 @@
 package com.icestar.gamekit
 {
-	public class PlayerStatus
+	final public class GKPlayerStatus
 	{
 		public static const AVAILABLE:uint = 1;
 		public static const CONNECTING:uint = 2;
@@ -8,7 +8,7 @@ package com.icestar.gamekit
 		public static const DISCONNECTED:uint = 4;
 		public static const UNAVAILABLE:uint = 5;
 		
-		public function PlayerStatus()
+		public function GKPlayerStatus()
 		{
 		}
 	}

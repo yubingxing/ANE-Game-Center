@@ -1,8 +1,8 @@
 package com.icestar.gamekit.interfaces
 {
-	import com.icestar.gamekit.Match;
-	import com.icestar.gamekit.Player;
-	import com.icestar.gamekit.p2p.Peer;
+	import com.icestar.gamekit.GKMatch;
+	import com.icestar.gamekit.GKPlayer;
+	import com.icestar.gamekit.p2p.GKPeer;
 	
 	/**
 	 * GameCenter and P2P game delegate interface
@@ -15,13 +15,13 @@ package com.icestar.gamekit.interfaces
 		function get isAuthenticated():Boolean;
 		function set peerDisplayName(pVal:String):void;
 		function get peerDisplayName():String;
-		function get detectedServers():Vector.<Peer>;
+		function get detectedServers():Vector.<GKPeer>;
 		function get isLocal():Boolean;
 		function get isHost():Boolean;
 		function get isServer():Boolean;
 		function get isClient():Boolean;
-		function get match():Match;
-		function get localPlayer():Player;
+		function get match():GKMatch;
+		function get localPlayer():GKPlayer;
 		function set expectedPlayerCount(pVal:int):void;
 		function get expectedPlayerCount():int;
 		

@@ -1,6 +1,6 @@
 package com.icestar.gamekit
 {
-	internal class NativeMethods
+	internal final class GKNativeMethods
 	{
 		internal static const isBluetoothAvailable : String = "isBluetoothAvailable";
 		internal static const alert : String = "GC_alert";

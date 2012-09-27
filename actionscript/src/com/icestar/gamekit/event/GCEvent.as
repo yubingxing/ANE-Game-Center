@@ -2,7 +2,7 @@ package com.icestar.gamekit.event
 {
 	import flash.events.Event;
 	
-	public final class GameCenterEvent extends Event {
+	public final class GCEvent extends Event {
 		public static const LOCALPLAYER_AUTHENTICATED:String  = "LocalPlayerAuthenticated";
 		public static const LOCALPLAYER_NOT_AUTHENTICATED:String = "LocalPlayerNotAuthenticated";
 		public static const SCORE_REPORTED:String = "ScoreReported";
@@ -19,7 +19,7 @@ package com.icestar.gamekit.event
 		public static const LOAD_ACHIEVEMENTS_COMPLETE:String = "LoadAchievementsComplete";
 		public static const LOAD_ACHIEVEMENTS_FAILED:String = "LoadAchievementsFailed";
 		
-		public function GameCenterEvent(type:String, data:*=null, bubbles:Boolean=false, cancelable:Boolean=false) {
+		public function GCEvent(type:String, data:*=null, bubbles:Boolean=false, cancelable:Boolean=false) {
 			this._data = data;
 			super(type, bubbles, cancelable);
 		}
