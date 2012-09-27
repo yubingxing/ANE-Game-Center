@@ -890,11 +890,11 @@ static NSString * appId;
     uint32_t _expectedPlayerCount = 2;
 
     GC_FREGetObjectAsString(myName, &_myName);
-    FREGetObjectAsUint32(playerCount, &_expectedPlayerCount);
-    FREGetObjectAsUint32(sessionMode, &_sessionMode);
-
-    
-
+    if(_expectedPlayerCount)
+        FREGetObjectAsUint32(playerCount, &_expectedPlayerCount);
+    if(_sessionMode)
+        FREGetObjectAsUint32(sessionMode, &_sessionMode);
+    _expectedPlayerCount = _expectedPlayerCount <= 2 ? 2 : _expectedPlayerCount;
     self.displayName = _myName;
     self.expectedPlayerCount = _expectedPlayerCount;
     
@@ -948,10 +948,11 @@ static NSString * appId;
     return nil;
 }
 
-- (FREObject) showPeerPicker {
+- (FREObject) showPeerPicker: (FREObject)myName sessionMode:(FREObject)mode {
     if(picker)[picker dismiss];
     picker = [[[GKPeerPickerController alloc] init] autorelease];
     picker.delegate = self;
+    [self requestPeerMatch:myName sessionMode:mode expectedPlayerCount:nil];
     [picker show];
     return nil;
 }

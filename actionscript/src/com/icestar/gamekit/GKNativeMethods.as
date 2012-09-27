@@ -28,13 +28,14 @@ package com.icestar.gamekit
 		internal static const sendDataToGCPlayers : String = "GC_sendDataToGCPlayers";
 		internal static const disconnectFromGCMatch : String = "GC_disconnectFromGCMatch";
 		// add local p2p func
-		internal static const requestPeerMatch : String = "LP_requestPeerMatch";
-		internal static const joinServer : String = "LP_joinServer";
-		internal static const acceptPeer : String = "LP_acceptPeer";
-		internal static const denyPeer : String = "LP_denyPeer";
-		internal static const sendDataToPeers : String = "LP_sendDataToPeers";
-		internal static const lockSession : String = "LP_lockSession";
-		internal static const disconnectFromAllPeers : String = "LP_disconnectFromAllPeers";
-		internal static const disconnectFromPeer : String = "LP_disconnectFromPeer";
+		internal static const showPeerPicker : String = "GK_showPeerPicker";
+		internal static const requestPeerMatch : String = "GK_requestPeerMatch";
+		internal static const joinServer : String = "GK_joinServer";
+		internal static const acceptPeer : String = "GK_acceptPeer";
+		internal static const denyPeer : String = "GK_denyPeer";
+		internal static const sendDataToPeers : String = "GK_sendDataToPeers";
+		internal static const lockSession : String = "GK_lockSession";
+		internal static const disconnectFromAllPeers : String = "GK_disconnectFromAllPeers";
+		internal static const disconnectFromPeer : String = "GK_disconnectFromPeer";
 	}
 }

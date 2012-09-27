@@ -136,35 +136,39 @@ DEFINE_ANE_FUNCTION( GC_disconnectFromGCMatch ) {
 }
 
 //=============================add local p2p func==================================
-DEFINE_ANE_FUNCTION( LP_requestPeerMatch ) {
+DEFINE_ANE_FUNCTION( GK_requestPeerMatch ) {
     return [GC_handler requestPeerMatch:argv[0] sessionMode:argv[1] expectedPlayerCount:argv[2]];
 }
 
-DEFINE_ANE_FUNCTION( LP_joinServer ) {
+DEFINE_ANE_FUNCTION( GK_showPeerPicker ) {
+    return [GC_handler showPeerPicker:argv[0] sessionMode:argv[1]];
+}
+
+DEFINE_ANE_FUNCTION( GK_joinServer ) {
     return [GC_handler joinServer:argv[0]];
 }
 
-DEFINE_ANE_FUNCTION( LP_acceptPeer ) {
+DEFINE_ANE_FUNCTION( GK_acceptPeer ) {
     return [GC_handler acceptPeer:argv[0]];
 }
 
-DEFINE_ANE_FUNCTION( LP_denyPeer ) {
+DEFINE_ANE_FUNCTION( GK_denyPeer ) {
     return [GC_handler denyPeer:argv[0]];
 }
 
-DEFINE_ANE_FUNCTION( LP_sendDataToPeers) {
+DEFINE_ANE_FUNCTION( GK_sendDataToPeers) {
     return [GC_handler sendDataToPeers:argv[0] msg:argv[1]];
 }
 
-DEFINE_ANE_FUNCTION( LP_lockSession ) {
+DEFINE_ANE_FUNCTION( GK_lockSession ) {
     return [GC_handler lockSession];
 }
 
-DEFINE_ANE_FUNCTION( LP_disconnectFromAllPeers ) {
+DEFINE_ANE_FUNCTION( GK_disconnectFromAllPeers ) {
     return [GC_handler disconnectFromAllPeers];
 }
 
-DEFINE_ANE_FUNCTION( LP_disconnectFromPeer ) {
+DEFINE_ANE_FUNCTION( GK_disconnectFromPeer ) {
     return [GC_handler disconnectFromPeer:argv[0]];
 }
 
@@ -176,14 +180,15 @@ void GameKitContextInitializer( void* extData, const uint8_t* ctxType, FREContex
         MAP_FUNCTION( GC_sendDataToGCPlayers, NULL ),
         MAP_FUNCTION( GC_disconnectFromGCMatch, NULL ),
         //======================add local p2p connection======================
-        MAP_FUNCTION( LP_requestPeerMatch, NULL ),
-        MAP_FUNCTION( LP_joinServer, NULL ),
-        MAP_FUNCTION( LP_acceptPeer, NULL ),
-        MAP_FUNCTION( LP_denyPeer, NULL ),
-        MAP_FUNCTION( LP_sendDataToPeers, NULL ),
-        MAP_FUNCTION( LP_lockSession, NULL ),
-        MAP_FUNCTION( LP_disconnectFromAllPeers, NULL ),
-        MAP_FUNCTION( LP_disconnectFromPeer, NULL ),
+        MAP_FUNCTION( GK_requestPeerMatch, NULL ),
+        MAP_FUNCTION( GK_joinServer, NULL ),
+        MAP_FUNCTION( GK_acceptPeer, NULL ),
+        MAP_FUNCTION( GK_denyPeer, NULL ),
+        MAP_FUNCTION( GK_sendDataToPeers, NULL ),
+        MAP_FUNCTION( GK_lockSession, NULL ),
+        MAP_FUNCTION( GK_disconnectFromAllPeers, NULL ),
+        MAP_FUNCTION( GK_disconnectFromPeer, NULL ),
+        MAP_FUNCTION( GK_showPeerPicker, NULL ),
         //======================leaderboard and achievement support=====================
         MAP_FUNCTION( GC_isSupported, NULL ),
         MAP_FUNCTION( GC_authenticateLocalPlayer, NULL ),

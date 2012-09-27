@@ -69,6 +69,7 @@ void handleReceivedData(NSData * data);
 - (FREObject) getStoredPlayers:(FREObject)asKey;
 // Add p2p connection func
 - (FREObject) requestPeerMatch:(FREObject)myName sessionMode:(FREObject)sessionMode expectedPlayerCount:(FREObject)expectedPlayerCount;
+- (FREObject) showPeerPicker: (FREObject)myName sessionMode:(FREObject)mode;
 - (FREObject) joinServer:(FREObject)peerId;
 - (FREObject) acceptPeer:(FREContext)peerId;
 - (FREObject) denyPeer:(FREContext)peerId;

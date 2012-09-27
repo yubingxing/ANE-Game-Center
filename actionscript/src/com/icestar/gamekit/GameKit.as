@@ -693,8 +693,12 @@ package com.icestar.gamekit
 			return ext.call( GKNativeMethods.getStoredPlayers, key ) as Array;
 		}
 		
-		public static function showMatchMaker( minPlayers:int, maxPlayers:int ):void {
+		public static function showMatchMaker( minPlayers:int=2, maxPlayers:int=4 ):void {
 			ext.call( GKNativeMethods.showMatchMaker, minPlayers, maxPlayers);
+		}
+		
+		public static function showPeerPicker(myName:String, sessionMode:int=1):void {
+			ext.call( GKNativeMethods.showPeerPicker, myName, sessionMode);
 		}
 		
 		public static function requestPeerMatch(myName:String, sessionMode:int=1, expectedPlayerCount:int=2):String {
